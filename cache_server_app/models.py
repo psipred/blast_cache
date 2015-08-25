@@ -25,23 +25,24 @@ class Cache_entry (models.Model):
         return str(self.uniprotID)
 
 
-class Pssm (TimeStampedModel):
+class file (TimeStampedModel):
+    PSSM = 1
+    CHK = 2
+    FILE_CHOICES = (
+        (PSSM, "pssm"),
+        (chk, "chk"),
+        # add more when more backends are complete
+    )
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
     expiry_date = models.DateTimeField(auto_now_add=True)
-    pssm_file = models.FileField(blank=False)
+    file = models.CharField(max_length=256, unique=True, null=False,
+                            blank=False, db_index=True)
+    file_type = models.IntegerField(null=False, blank=False,
+                                    choices=FILE_CHOICES, default=CHK)
+    file_byte_location = models.IntegerField(default=0, null=False, blank=False)
     hit_count = models.IntegerField(default=0, null=False, blank=False)
     cache_entry = models.ForeignKey(Cache_entry)
-
-    def __str__(self):
-        return str(self.pk)
-
-
-class Chk (TimeStampedModel):
-    accessed_count = models.IntegerField(default=0, null=False, blank=False)
-    expiry_date = models.DateTimeField(auto_now_add=True)
-    chk_file = models.FileField(blank=False)
-    hit_count = models.IntegerField(default=0, null=False, blank=False)
-    cache_entry = models.ForeignKey(Cache_entry)
+    blast_hits = models.IntegerField(default=0, null=False, blank=False)
 
     def __str__(self):
         return str(self.pk)
