@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class TimeStampedModel(models.Model):
     """
     An abstract base class model that provides self-updating ``created``
@@ -16,8 +17,8 @@ class TimeStampedModel(models.Model):
 
 
 class Cache_entry (models.Model):
-    uniprotID models.CharField(max_length=20, unique=True, null=False,
-                               blank=False, db_index=True)
+    uniprotID = models.CharField(max_length=20, unique=True, null=False,
+                                 blank=False, db_index=True)
     md5 = models.CharField(max_length=64, unique=True, null=False,
                            blank=False, db_index=True)
 
@@ -25,22 +26,22 @@ class Cache_entry (models.Model):
         return str(self.uniprotID)
 
 
-class file (TimeStampedModel):
+class File (TimeStampedModel):
     PSSM = 1
     CHK = 2
     FILE_CHOICES = (
         (PSSM, "pssm"),
-        (chk, "chk"),
+        (CHK, "chk"),
         # add more when more backends are complete
     )
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
     expiry_date = models.DateTimeField(auto_now_add=True)
-    file = models.CharField(max_length=256, unique=True, null=False,
-                            blank=False, db_index=True)
+    file_location = models.CharField(max_length=256, unique=True, null=False,
+                                     blank=False, db_index=True)
     file_type = models.IntegerField(null=False, blank=False,
                                     choices=FILE_CHOICES, default=CHK)
-    file_byte_location = models.IntegerField(default=0, null=False, blank=False)
-    hit_count = models.IntegerField(default=0, null=False, blank=False)
+    file_byte_start = models.IntegerField(default=0, null=False, blank=False)
+    file_byte_stop = models.IntegerField(default=0, null=False, blank=False)
     cache_entry = models.ForeignKey(Cache_entry)
     blast_hits = models.IntegerField(default=0, null=False, blank=False)
 

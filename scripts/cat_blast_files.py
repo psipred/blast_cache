@@ -3,6 +3,8 @@ import os
 import glob
 import sys
 
+# python ../scripts/cat_blast_files.py ~/Code/cache_server/files/ chk > all.chk
+
 os.chdir(sys.argv[1])
 for file in glob.glob("*."+sys.argv[2]):
     file_id = os.path.splitext(file)[0]
