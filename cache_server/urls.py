@@ -15,16 +15,21 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from rest_framework.urlpatterns import format_suffix_patterns
+
+from cache_server_app import api
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^cache_server/', include('cache_server_app.urls')),
     url(r'^cache_server/$',
-        api.CachenDetails.as_view(),
+        api.CacheDetails.as_view(),
         name="cache"),
-    url(r'^cache_server/(?P<md5>.+})$',
+    url(r'^cache_server/(?P<md5>\S{32})$',
         api.CacheDetails.as_view(),
         name="cacheDetail"),
     url(r'^login/$', 'django.contrib.auth.views.login'),
     url(r'^logout/$', 'django.contrib.auth.views.logout'),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])

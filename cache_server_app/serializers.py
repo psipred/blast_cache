@@ -10,11 +10,11 @@ class FileOutputSerializer(serializers.ModelSerializer):
 
 
 class CacheEntryOutputSerializer(serializers.ModelSerializer):
-    results = FileOutputSerializer(many=True)
+    file_set = FileOutputSerializer(many=True)
 
     class Meta:
         model = Cache_entry
-        fields = ('uniprotID', 'md5')
+        fields = ('uniprotID', 'md5', 'file_set')
 
 
 class FileInputSerializer(serializers.ModelSerializer):
@@ -25,11 +25,11 @@ class FileInputSerializer(serializers.ModelSerializer):
 
 
 class CacheEntryInputSerializer(serializers.ModelSerializer):
-    results = FileInputSerializer(many=True)
+    file_set = FileInputSerializer(many=True)
 
     class Meta:
         model = Cache_entry
-        fields = ('uniprotID', 'md5')
+        fields = ('uniprotID', 'md5', 'file_set')
 
 class CacheEntryUpdateSerializer(serializers.ModelSerializer):
     results = FileInputSerializer(many=True)

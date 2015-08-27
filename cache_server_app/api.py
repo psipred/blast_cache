@@ -20,6 +20,8 @@ class CacheDetails(mixins.RetrieveModelMixin,
     """
         API for gettting or updating cached blast data
     """
+    queryset = Cache_entry.objects.all()
+    lookup_field = 'md5'
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -27,7 +29,7 @@ class CacheDetails(mixins.RetrieveModelMixin,
         if self.request.method == 'POST':
             return CacheEntryInputSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, format=None, *args, **kwargs):
         """
             Returns the chk and pssm files
         """
