@@ -18,14 +18,16 @@ class CacheEntryTests(APITestCase):
     def test_get_returns_entry(self):
         ce = CacheEntryFactory.create()
         f1 = FileFactory(cache_entry=ce)
-        print(ce.md5)
         response = self.client.get(reverse('cacheDetail',
                                            args=[ce.md5, ]) + ".json")
-        print(reverse('cacheDetail', args=[ce.md5, ]))
         response.render()
         self.assertEqual(response.status_code, 200)
-        # test_data = '{"count":2,"next":null,"previous":null,' \
-        #             '"results":[{"pk":2,"name":"job1"},{"pk":3,"name":"job2"}]}'
-        # self.assertEqual(response.content.decode("utf-8"), test_data)
-
-        print(f1)
+        date = str(f1.expiry_date)
+        date = date[:10] + 'T' + date[11:]
+        date = date[:26] + 'Z'
+        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(ce.uniprotID,
+                                                              ce.md5)
+        test_data += '"file_set":[{{"accessed_count":{0},'.format(f1.accessed_count)
+        test_data += '"expiry_date":"{0}","file_type":{1},'.format(date, f1.file_type)
+        test_data += '"blast_hits":{0}}}]}}'.format(f1.blast_hits)
+        self.assertEqual(response.content.decode("utf-8"), test_data)
