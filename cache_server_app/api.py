@@ -11,6 +11,7 @@ from .serializers import CacheEntryInputSerializer, FileInputSerializer
 from .models import Cache_entry, File
 from .forms import CacheEntryForm, FileForm
 
+
 class SubmissionDetails(mixins.RetrieveModelMixin,
                         mixins.CreateModelMixin,
                         generics.GenericAPIView,
@@ -27,7 +28,7 @@ class SubmissionDetails(mixins.RetrieveModelMixin,
 
     def get(self, request, *args, **kwargs):
         """
-            Returns the current status of a job
+            Returns the chk and pssm files
         """
         return self.retrieve(request, *args, **kwargs)
 
@@ -41,3 +42,4 @@ class SubmissionDetails(mixins.RetrieveModelMixin,
         """
             Add a new uniprot ID and then add the pssm/chk
         """
+        return self.retrieve(request, *args, **kwargs)

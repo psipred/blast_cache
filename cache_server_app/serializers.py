@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-import .models import Cache_entry, File
+from .models import Cache_entry, File
 
 
 class FileOutputSerializer (serializers.ModelSerializer):

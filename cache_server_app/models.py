@@ -35,7 +35,7 @@ class File (TimeStampedModel):
         # add more when more backends are complete
     )
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
-    expiry_date = models.DateTimeField(auto_now_add=True)
+    expiry_date = models.DateTimeField(auto_now_add=False)
     file_location = models.CharField(max_length=256, unique=True, null=False,
                                      blank=False, db_index=True)
     file_type = models.IntegerField(null=False, blank=False,
