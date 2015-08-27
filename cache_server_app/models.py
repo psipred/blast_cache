@@ -22,6 +22,9 @@ class Cache_entry (models.Model):
     md5 = models.CharField(max_length=64, unique=True, null=False,
                            blank=False, db_index=True)
 
+    def latest_file(self):
+        return max(self.file_set.all(), key=lambda File: File.created)
+
     def __str__(self):
         return str(self.uniprotID)
 
@@ -36,7 +39,7 @@ class File (TimeStampedModel):
     )
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
     expiry_date = models.DateTimeField(auto_now_add=False)
-    file_location = models.CharField(max_length=256, unique=True, null=False,
+    file_location = models.CharField(max_length=256, null=False,
                                      blank=False, db_index=True)
     file_type = models.IntegerField(null=False, blank=False,
                                     choices=FILE_CHOICES, default=CHK)
@@ -47,3 +50,6 @@ class File (TimeStampedModel):
 
     def __str__(self):
         return str(self.pk)
+
+    class Meta:
+        get_latest_by = 'created'

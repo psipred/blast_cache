@@ -15,19 +15,45 @@ from .model_factories import *
 
 class CacheEntryTests(APITestCase):
 
+    ce = None
+    fe = None
+
+    def setUp(self):
+        self.ce = CacheEntryFactory.create()
+        self.f1 = FileFactory.create(cache_entry=self.ce)
+
+    def tearDown(self):
+        Cache_entry.objects.all().delete()
+        File.objects.all().delete()
+
     def test_get_returns_entry(self):
-        ce = CacheEntryFactory.create()
-        f1 = FileFactory(cache_entry=ce)
         response = self.client.get(reverse('cacheDetail',
-                                           args=[ce.md5, ]) + ".json")
+                                           args=[self.ce.md5, ]) + ".json")
         response.render()
         self.assertEqual(response.status_code, 200)
-        date = str(f1.expiry_date)
+        date = str(self.f1.expiry_date)
         date = date[:10] + 'T' + date[11:]
         date = date[:26] + 'Z'
-        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(ce.uniprotID,
-                                                              ce.md5)
-        test_data += '"file_set":[{{"accessed_count":{0},'.format(f1.accessed_count)
-        test_data += '"expiry_date":"{0}","file_type":{1},'.format(date, f1.file_type)
-        test_data += '"blast_hits":{0}}}]}}'.format(f1.blast_hits)
+        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(self.ce.uniprotID,
+                                                              self.ce.md5)
+        test_data += '"file_set":[{{"accessed_count":{0},'.format(self.f1.accessed_count)
+        test_data += '"expiry_date":"{0}","file_type":{1},'.format(date, self.f1.file_type)
+        test_data += '"blast_hits":{0}}}]}}'.format(self.f1.blast_hits)
+        self.assertEqual(response.content.decode("utf-8"), test_data)
+
+    def test_get_returns_latest_files(self):
+        self.maxDiff=None
+        f2 = FileFactory.create(cache_entry=self.ce)
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[self.ce.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        date = str(f2.expiry_date)
+        date = date[:10] + 'T' + date[11:]
+        date = date[:26] + 'Z'
+        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(self.ce.uniprotID,
+                                                              self.ce.md5)
+        test_data += '"file_set":[{{"accessed_count":{0},'.format(f2.accessed_count)
+        test_data += '"expiry_date":"{0}","file_type":{1},'.format(date, f2.file_type)
+        test_data += '"blast_hits":{0}}}]}}'.format(f2.blast_hits)
         self.assertEqual(response.content.decode("utf-8"), test_data)
