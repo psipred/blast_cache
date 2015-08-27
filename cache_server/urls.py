@@ -18,4 +18,13 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^cache_server/', include('cache_server_app.urls')),
+    url(r'^cache_server/$',
+        api.CachenDetails.as_view(),
+        name="cache"),
+    url(r'^cache_server/(?P<md5>.+})$',
+        api.CacheDetails.as_view(),
+        name="cacheDetail"),
+    url(r'^login/$', 'django.contrib.auth.views.login'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout'),
 ]

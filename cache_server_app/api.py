@@ -12,8 +12,9 @@ from .models import Cache_entry, File
 from .forms import CacheEntryForm, FileForm
 
 
-class SubmissionDetails(mixins.RetrieveModelMixin,
+class CacheDetails(mixins.RetrieveModelMixin,
                         mixins.CreateModelMixin,
+                        mixins.UpdateModelMixin,
                         generics.GenericAPIView,
                         ):
     """
@@ -22,9 +23,9 @@ class SubmissionDetails(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return SubmissionOutputSerializer
+            return CacheEntryOutputSerializer
         if self.request.method == 'POST':
-            return SubmissionInputSerializer
+            return CacheEntryInputSerializer
 
     def get(self, request, *args, **kwargs):
         """
