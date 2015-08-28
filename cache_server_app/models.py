@@ -22,9 +22,6 @@ class Cache_entry (models.Model):
     md5 = models.CharField(max_length=64, unique=True, null=False,
                            blank=False, db_index=True)
 
-    def latest_file(self):
-        return max(self.file_set.all(), key=lambda File: File.created)
-
     def __str__(self):
         return str(self.uniprotID)
 
