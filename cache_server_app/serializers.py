@@ -31,9 +31,20 @@ class CacheEntryInputSerializer(serializers.ModelSerializer):
         model = Cache_entry
         fields = ('uniprotID', 'md5', 'file_set')
 
+
 class CacheEntryUpdateSerializer(serializers.ModelSerializer):
     results = FileInputSerializer(many=True)
 
     class Meta:
         model = Cache_entry
         fields = ('uniprotID', 'md5')
+
+
+class FileUploadSerializer(serializers.ModelSerializer):
+    pssm_file = serializers.CharField()
+    chk_file = serializers.CharField()
+    fasta_file = serializers.CharField()
+
+    class Meta:
+        model = Cache_entry
+        fields = ('pssm_file', 'chk_file', 'fasta_file')

@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^cache_server/(?P<md5>\S{32})$',
         api.CacheDetails.as_view(),
         name="cacheDetail"),
+    url(r'^cache_server/upload/$', api.UploadFile.as_view(), name="uploadFile"),
     url(r'^login/$', 'django.contrib.auth.views.login'),
     url(r'^logout/$', 'django.contrib.auth.views.logout'),
 ]
