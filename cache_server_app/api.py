@@ -95,14 +95,15 @@ class UploadFile(mixins.CreateModelMixin,
 
         id_re = re.compile(">.{2}\|(.+?)\|.+?\s")
         with open(fasta_file) as fastafile:
-            for line in fastafile:
+            for line in fastafile.readlines():
                 m = hashlib.md5()
                 if line.startswith(">"):
                     match = re.match(id_re, line)
-                    uniprotID = match.group(1))
-                    seq = next(fastafile)
+                    uniprotID = match.group(1)
+                    print(fastafile.tell())
+                    seq = fastafile.readlines()
                     m.update(seq.encode('utf-8'))
-                    md5 = m.hexdigest())
+                    md5 = m.hexdigest()
 
 
         return self.create(request, *args, **kwargs)
