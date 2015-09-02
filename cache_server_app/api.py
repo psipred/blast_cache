@@ -94,14 +94,16 @@ class UploadFile(mixins.CreateModelMixin,
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
         id_re = re.compile(">.{2}\|(.+?)\|.+?\s")
-        with open(fasta_file) as fastafile:
-            for line in fastafile.readlines():
+        with open(fasta_file, "rb") as fastafile:
+            for byteline in fastafile:
+                line = byteline.decode("utf-8")
                 m = hashlib.md5()
                 if line.startswith(">"):
                     match = re.match(id_re, line)
                     uniprotID = match.group(1)
+                    byteseq = next(fastafile)
+                    seq = byteseq.decode("utf-8")
                     print(fastafile.tell())
-                    seq = fastafile.readlines()
                     m.update(seq.encode('utf-8'))
                     md5 = m.hexdigest()
 
