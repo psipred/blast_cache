@@ -103,9 +103,10 @@ class UploadFile(mixins.CreateModelMixin,
                     uniprotID = match.group(1)
                     byteseq = next(fastafile)
                     seq = byteseq.decode("utf-8")
-                    print(fastafile.tell())
                     m.update(seq.encode('utf-8'))
                     md5 = m.hexdigest()
+                    # open the pssm file and get the boundaries for this seek
+                    # open the chk file and get the boundaries to seek. 
 
 
         return self.create(request, *args, **kwargs)
