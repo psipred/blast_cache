@@ -11,6 +11,6 @@ for file in glob.glob("*."+sys.argv[2]):
     print(">>>START FILE: "+file_id+"."+sys.argv[2])
     with open(file) as infile:
         for line in infile:
-            line = line.strip()
+            line = line.rstrip()
             print(line)
     print(">>>STOP FILE: "+file_id+"."+sys.argv[2])
