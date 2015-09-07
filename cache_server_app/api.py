@@ -54,7 +54,7 @@ class CacheDetails(mixins.RetrieveModelMixin,
 
     def get(self, request, format=None, *args, **kwargs):
         """
-            Returns the chk and pssm files
+            Returns the chk and pssm files, given an md5
         """
         return self.retrieve(request, *args, **kwargs)
 
@@ -123,8 +123,8 @@ class UploadFile(mixins.CreateModelMixin,
             content = {'error': "Input does not contain all required fields"}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-        if not os.path.isfile(pssm_file) and not os.path.isfile(chk_file) \
-           and not os.path.isfile(fasta_file):
+        if not os.path.isfile(pssm_file) or not os.path.isfile(chk_file) \
+           or not os.path.isfile(fasta_file):
             content = {'error': "One or more of your files does not exist"}
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
