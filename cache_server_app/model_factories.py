@@ -15,6 +15,7 @@ from .models import Cache_entry, File
 def random_string(length=10):
     return u''.join(random.choice(string.ascii_letters) for x in range(length))
 
+
 def produce_hash():
     test_seq = random_string(length=240)
     m = hashlib.md5()
@@ -33,14 +34,14 @@ class CacheEntryFactory(factory.DjangoModelFactory):
 
 class FileFactory(factory.DjangoModelFactory):
     cache_entry = CacheEntryFactory.create()
-    accessed_count = random.randint(0,100)
+    accessed_count = random.randint(0, 100)
     expiry_date = factory.fuzzy.FuzzyDateTime(
                   datetime.datetime(2008, 1, 1, tzinfo=pytz.utc))
     file_location = "/"+str(factory.LazyAttribute(lambda t: random_string()))
     file_type = File.PSSM
     file_byte_start = random.randint(0, 1000000)
     file_byte_stop = file_byte_start + random.randint(0, 1000000)
-    blast_hits = random.randint(0,1000)
+    blast_hits = random.randint(0, 1000)
 
     class Meta:
         model = File

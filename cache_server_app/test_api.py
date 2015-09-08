@@ -1,3 +1,5 @@
+import hashlib
+
 from django.test import TestCase
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -16,6 +18,7 @@ from .model_factories import *
 
 class CacheEntryTests(APITestCase):
 
+    factory = APIRequestFactory()
     ce = None
     fe = None
 
@@ -64,18 +67,34 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
     # If we upload some real data do we get the correct information back?
-    # def test_return_a_correct_pssm_and_chk(self):
-    #   base = settings.BASE_DIR+"/files/"
-    #   self.request = self.factory.post(reverse('uploadFile'),
-    #                         {'fasta_file': base+"all.fasta",
-    #                          'pssm_file': base+"all.pssm",
-    #                          'chk_file': base+"all.chk", })
-    #     view = UploadFile.as_view()
-    #     response = view(request)
-    #     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-    #     # read in a fasta file, take the md5 and then look up
-    #     request = self.factory.get(reverse('cacheDetail'))
+    def test_return_a_correct_pssm_and_chk(self):
+        base = settings.BASE_DIR+"/files/"
+        request = self.factory.post(reverse('uploadFile'),
+                                    {'fasta_file': base+"all.fasta",
+                                     'pssm_file': base+"all.pssm",
+                                     'chk_file': base+"all.chk", })
+        view = UploadFile.as_view()
+        response = view(request)
+        md5 = "a452652e0879d22a04618efb004a03c5"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        # self.request = self.factory.get(reverse('cacheDetail')+md5)
 
+    def test_404_on_bad_request(self):
+        md5 = "a452652e0879d22a04618efb004a03c3"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 404)
+        # self.request = self.factory.get(reverse('cacheDetail')+md5)
+
+    def test_post_a_novel_set_of_files(self):
+        pass
+
+    def test_update_an_existing_entry(self):
+        pass
 
 class UploadFileTests(APITestCase):
 
@@ -85,9 +104,9 @@ class UploadFileTests(APITestCase):
 
     def setUp(self):
         self.request = self.factory.post(reverse('uploadFile'),
-                                    {'fasta_file': self.base+"all.fasta",
-                                     'pssm_file': self.base+"all.pssm",
-                                     'chk_file': self.base+"all.chk", })
+                                         {'fasta_file': self.base+"all.fasta",
+                                          'pssm_file': self.base+"all.pssm",
+                                          'chk_file': self.base+"all.chk", })
 
     def tearDown(self):
         Cache_entry.objects.all().delete()

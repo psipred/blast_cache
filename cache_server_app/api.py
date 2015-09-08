@@ -2,11 +2,14 @@ import os.path
 import hashlib
 import re
 import pprint
+import pytz
 
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from django.db.models import Prefetch
+from django.utils import timezone
+from django.http import Http404
 
 from rest_framework import viewsets
 from rest_framework import mixins
@@ -40,6 +43,9 @@ class CacheDetails(mixins.RetrieveModelMixin,
         md5 = self.kwargs['md5']
         # TODO: Three queries here, should be able to make this two or fewer!
         ce = Cache_entry.objects.filter(md5=md5)
+        if len(ce)==0:
+            raise Http404
+
         f = File.objects.filter(cache_entry=ce).latest()
         queryset = Cache_entry.objects.filter(md5=md5).prefetch_related(
                    Prefetch("file_set", queryset=File.objects.filter(
