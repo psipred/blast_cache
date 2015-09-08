@@ -1,5 +1,6 @@
 import hashlib
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -21,10 +22,22 @@ class CacheEntryTests(APITestCase):
     factory = APIRequestFactory()
     ce = None
     fe = None
+    data = {}
 
     def setUp(self):
         self.ce = CacheEntryFactory.create()
         self.f1 = FileFactory.create(cache_entry=self.ce)
+
+        self.pssm = SimpleUploadedFile('test.pssm',
+                                       bytes('SOME PSSM CONTENTS',
+                                             'utf-8'))
+        self.chk = SimpleUploadedFile('test.chk',
+                                      bytes('SOME CHK CONTENTS',
+                                            'utf-8'))
+
+        self.data = {'pssm_file': self.pssm,
+                     'chk_file': self.chk,
+                     'md5': 'a452652e0879d22a04618efb004a03c5'}
 
     def tearDown(self):
         Cache_entry.objects.all().delete()
@@ -53,7 +66,7 @@ class CacheEntryTests(APITestCase):
         response = self.client.get(reverse('cacheDetail',
                                            args=[self.ce.md5, ]) + ".json")
         response.render()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         date = str(f2.expiry_date)
         date = date[:10] + 'T' + date[11:]
         date = date[:26] + 'Z'
@@ -79,7 +92,7 @@ class CacheEntryTests(APITestCase):
         response = self.client.get(reverse('cacheDetail',
                                            args=[md5, ]) + ".json")
         response.render()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         # self.request = self.factory.get(reverse('cacheDetail')+md5)
 
     def test_404_on_bad_request(self):
@@ -87,14 +100,28 @@ class CacheEntryTests(APITestCase):
         response = self.client.get(reverse('cacheDetail',
                                            args=[md5, ]) + ".json")
         response.render()
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         # self.request = self.factory.get(reverse('cacheDetail')+md5)
 
     def test_post_a_novel_set_of_files(self):
+        request = self.factory.post(reverse('cache'), self.data,
+                                    format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_reject_a_file_post_if_entry_exists(self):
         pass
+        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_update_an_existing_entry(self):
+        #self.assertEqual(response.status_code, status.HTTP_200_OK)
         pass
+
+    def test_reject_update_if_entry_nonexistant(self):
+        pass
+        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 class UploadFileTests(APITestCase):
 
