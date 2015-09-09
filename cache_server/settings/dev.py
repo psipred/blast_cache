@@ -28,3 +28,6 @@ INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 # TODO: Change this for staging and production
 MEDIA_URL = '/submissions/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'submissions')
+
+USER_CHK = BASE_DIR+"/files/test.chk"
+USER_PSSM = BASE_DIR+"/files/test.pssm"

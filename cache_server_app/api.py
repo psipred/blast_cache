@@ -10,6 +10,8 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Prefetch
 from django.utils import timezone
 from django.http import Http404
+from django.utils.datastructures import MultiValueDictKeyError
+from django.conf import settings
 
 from rest_framework import viewsets
 from rest_framework import mixins
@@ -70,11 +72,58 @@ class CacheDetails(mixins.RetrieveModelMixin,
         """
         return self.retrieve(request, *args, **kwargs)
 
+    def __prepare_data(self, request):
+        request_contents = request.data
+        data = {}
+        try:
+            data['md5'] = request_contents.pop('md5')[0]
+            data['hit_count'] = request_contents.pop('hit_count')[0]
+            data['uniprotID'] = request_contents.pop('uniprotID')[0]
+        except MultiValueDictKeyError:
+            raise MultiValueDictKeyError
+        except KeyError:
+            raise KeyError
+
+        return(data, request_contents)
+
+    def __pseudo_lock_write(self, write_file, lock_file, string):
+        if os.path.isfile(write_file):
+            while os.path.isfile(lock_file):
+                time.sleep(5)
+            open(lock_file, 'a').close()
+            f = open(write_file, 'a')
+            f.write(string)
+            f.flush()
+            f.close()
+            os.remove(lock_file)
+
     def post(self, request, *args, **kwargs):
         """
             Add a new uniprot ID and then add the pssm/chk
         """
-        return self.retrieve(request, *args, **kwargs)
+        # we get the files
+        # append them to the new file getting the coords
+        request_contents = request.data
+        try:
+            data, request_contents = self.__prepare_data(request)
+        except MultiValueDictKeyError:
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+        except KeyError:
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        # check we don't have this particular seq
+        ce = Cache_entry.objects.filter(md5=data['md5'])
+        if len(ce) > 0:
+            return Response("Hey Yo", status=status.HTTP_400_BAD_REQUEST)
+
+        pssm_size = os.path.getsize(settings.USER_PSSM)
+        chk_size = os.path.getsize(settings.USER_CHK)
+        self.__pseudo_lock_write(settings.USER_CHK, settings.CHK_LOCK, "testing")
+        self.__pseudo_lock_write(settings.USER_PSSM, settings.PSSM_LOCK, "testing")
+
+        return Response("Hey Yo", status=status.HTTP_201_CREATED)
 
 
 class UploadFile(mixins.CreateModelMixin,

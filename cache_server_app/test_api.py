@@ -1,4 +1,5 @@
 import hashlib
+import os
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -35,9 +36,19 @@ class CacheEntryTests(APITestCase):
                                       bytes('SOME CHK CONTENTS',
                                             'utf-8'))
 
-        self.data = {'pssm_file': self.pssm,
-                     'chk_file': self.chk,
-                     'md5': 'a452652e0879d22a04618efb004a03c5'}
+        self.inputdata = {'pssm_file': self.pssm,
+                          'chk_file': self.chk,
+                          'md5': 'a452652e0879d22a04618efb004a03c5',
+                          'hit_count': 500,
+                          'uniprotID': "P023423", }
+
+    def setUpClass():
+        open(settings.USER_PSSM, 'a').close()
+        open(settings.USER_CHK, 'a').close()
+
+    def tearDownClass():
+        os.remove(settings.USER_PSSM)
+        os.remove(settings.USER_CHK)
 
     def tearDown(self):
         Cache_entry.objects.all().delete()
@@ -104,7 +115,7 @@ class CacheEntryTests(APITestCase):
         # self.request = self.factory.get(reverse('cacheDetail')+md5)
 
     def test_post_a_novel_set_of_files(self):
-        request = self.factory.post(reverse('cache'), self.data,
+        request = self.factory.post(reverse('cache'), self.inputdata,
                                     format='multipart')
         view = CacheDetails.as_view()
         response = view(request)
