@@ -148,6 +148,9 @@ class CacheEntryTests(APITestCase):
         view = CacheDetails.as_view()
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        seqs = Cache_entry.objects.filter(uniprotID="P023423")
+        self.assertEqual(len(seqs), 1)
+        self.assertEqual(len(seqs[0].file_set.all()), 4)
 
     def test_reject_update_if_entry_nonexistant(self):
         request = self.factory.put(reverse('cache'), self.inputdata,
