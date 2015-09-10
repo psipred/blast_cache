@@ -37,6 +37,68 @@ class CacheDetails(mixins.RetrieveModelMixin,
     """
     lookup_field = 'md5'
 
+    def __prepare_data(self, request):
+        request_contents = request.data
+        data = {}
+        try:
+            data['md5'] = request_contents.pop('md5')[0]
+            data['hit_count'] = request_contents.pop('hit_count')[0]
+            data['uniprotID'] = request_contents.pop('uniprotID')[0]
+            data['runtime'] = request_contents.pop('runtime')[0]
+        except MultiValueDictKeyError:
+            raise MultiValueDictKeyError
+        except KeyError:
+            raise KeyError
+
+        return(data, request_contents)
+
+    def __pseudo_lock_write(self, write_file, lock_file, string):
+        if os.path.isfile(write_file):
+            while os.path.isfile(lock_file):
+                time.sleep(5)
+            open(lock_file, 'a').close()
+            f = open(write_file, 'a')
+            f.write(string)
+            f.flush()
+            f.close()
+            os.remove(lock_file)
+
+    def __insert_new_files(self, request, data, ce):
+        pssm_size = os.path.getsize(settings.USER_PSSM)
+        chk_size = os.path.getsize(settings.USER_CHK)
+        pssm_data = request.FILES['pssm_file'].read().decode("utf-8")
+        chk_data = request.FILES['chk_file'].read().decode("utf-8")
+        pssm_string = ">>>START FILE: "+data['uniprotID']+".pssm\n"
+        pssm_string += pssm_data+"\n"
+        pssm_string += ">>>STOP FILE: "+data['uniprotID']+".pssm\n"
+        chk_string = ">>>START FILE: "+data['uniprotID']+".chk\n"
+        chk_string += chk_data+"\n"
+        chk_string += ">>>STOP FILE: "+data['uniprotID']+".chk\n"
+
+        self.__pseudo_lock_write(settings.USER_CHK,
+                                 settings.CHK_LOCK, chk_string)
+        self.__pseudo_lock_write(settings.USER_PSSM,
+                                 settings.PSSM_LOCK, pssm_string)
+        pssm_start = pssm_size+20+len(data['uniprotID'])
+        pssm_stop = pssm_start+len(pssm_data)
+        chk_start = chk_size+19+len(data['uniprotID'])
+        chk_stop = chk_start+len(chk_data)
+
+        File.insert_file_details(ce=ce,
+                                 file_location=settings.USER_PSSM,
+                                 file_type=File.PSSM,
+                                 start=pssm_start,
+                                 stop=pssm_stop,
+                                 hits=data['hit_count'],
+                                 runtime=data['runtime'])
+        File.insert_file_details(ce=ce,
+                                 file_location=settings.USER_CHK,
+                                 file_type=File.CHK,
+                                 start=chk_start,
+                                 stop=chk_stop,
+                                 hits=data['hit_count'],
+                                 runtime=data['runtime'])
+
     def get_queryset(self):
         """
         Optionally restricts the returned purchases to a given user,
@@ -45,7 +107,7 @@ class CacheDetails(mixins.RetrieveModelMixin,
         md5 = self.kwargs['md5']
         # TODO: Three queries here, should be able to make this two or fewer!
         ce = Cache_entry.objects.filter(md5=md5)
-        if len(ce)==0:
+        if len(ce) == 0:
             raise Http404
 
         f = File.objects.filter(cache_entry=ce).latest()
@@ -66,36 +128,27 @@ class CacheDetails(mixins.RetrieveModelMixin,
         """
         return self.retrieve(request, *args, **kwargs)
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
             Update a PSI-BLAST result
         """
-        return self.retrieve(request, *args, **kwargs)
-
-    def __prepare_data(self, request):
         request_contents = request.data
-        data = {}
         try:
-            data['md5'] = request_contents.pop('md5')[0]
-            data['hit_count'] = request_contents.pop('hit_count')[0]
-            data['uniprotID'] = request_contents.pop('uniprotID')[0]
+            data, request_contents = self.__prepare_data(request)
         except MultiValueDictKeyError:
-            raise MultiValueDictKeyError
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
         except KeyError:
-            raise KeyError
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-        return(data, request_contents)
+        ce = Cache_entry.objects.filter(md5=data['md5'])
+        if len(ce) == 0:
+            return Response("Sequence not present",
+                            status=status.HTTP_400_BAD_REQUEST)
 
-    def __pseudo_lock_write(self, write_file, lock_file, string):
-        if os.path.isfile(write_file):
-            while os.path.isfile(lock_file):
-                time.sleep(5)
-            open(lock_file, 'a').close()
-            f = open(write_file, 'a')
-            f.write(string)
-            f.flush()
-            f.close()
-            os.remove(lock_file)
+        self.__insert_new_files(request, data, ce[0])
+        return Response("Your files updated", status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """
@@ -118,12 +171,11 @@ class CacheDetails(mixins.RetrieveModelMixin,
         if len(ce) > 0:
             return Response("Hey Yo", status=status.HTTP_400_BAD_REQUEST)
 
-        pssm_size = os.path.getsize(settings.USER_PSSM)
-        chk_size = os.path.getsize(settings.USER_CHK)
-        self.__pseudo_lock_write(settings.USER_CHK, settings.CHK_LOCK, "testing")
-        self.__pseudo_lock_write(settings.USER_PSSM, settings.PSSM_LOCK, "testing")
-
-        return Response("Hey Yo", status=status.HTTP_201_CREATED)
+        ce = Cache_entry.objects.create(uniprotID=data['uniprotID'])
+        ce.md5 = data['md5']
+        ce.save()
+        self.__insert_new_files(request, data, ce)
+        return Response("Your files were added", status=status.HTTP_201_CREATED)
 
 
 class UploadFile(mixins.CreateModelMixin,
@@ -147,18 +199,6 @@ class UploadFile(mixins.CreateModelMixin,
                     stop = pssmfile.tell()-len(line)
                     result_dict[uniprotID] = [start, stop]
         return(result_dict)
-
-    def insert_file_details(self, ce, file_location, file_type,
-                            start, stop, hits):
-        exp_date = date.today() + relativedelta(months=+6)
-        f = File.objects.create(cache_entry=ce, expiry_date=exp_date)
-        f.accessed_count = 0
-        f.file_location = file_location
-        f.file_type = file_type
-        f.file_byte_start = start
-        f.file_byte_stop = stop
-        f.blast_hits = hits
-        f.save()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -210,17 +250,19 @@ class UploadFile(mixins.CreateModelMixin,
                     ce = Cache_entry.objects.create(uniprotID=uniprotID)
                     ce.md5 = md5
                     ce.save()
-                    self.insert_file_details(ce,
-                                             pssm_file,
-                                             File.PSSM,
-                                             pssm_dict[uniprotID][0],
-                                             pssm_dict[uniprotID][1],
-                                             0)
-                    self.insert_file_details(ce,
-                                             chk_file,
-                                             File.CHK,
-                                             chk_dict[uniprotID][0],
-                                             chk_dict[uniprotID][1],
-                                             0)
+                    File.insert_file_details(ce=ce,
+                                             file_location=pssm_file,
+                                             file_type=File.PSSM,
+                                             start=pssm_dict[uniprotID][0],
+                                             stop=pssm_dict[uniprotID][1],
+                                             hits=0,
+                                             runtime=None)
+                    File.insert_file_details(ce=ce,
+                                             file_location=chk_file,
+                                             file_type=File.CHK,
+                                             start=chk_dict[uniprotID][0],
+                                             stop=chk_dict[uniprotID][1],
+                                             hits=0,
+                                             runtime=None)
         content = {"Fasta file, pssm and chk data uploaded"}
         return Response(content, status=status.HTTP_201_CREATED)
