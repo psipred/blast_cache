@@ -62,8 +62,9 @@ class CacheEntryTests(APITestCase):
         date = str(self.f1.expiry_date)
         date = date[:10] + 'T' + date[11:]
         date = date[:26] + 'Z'
-        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(self.ce.uniprotID,
-                                                              self.ce.md5)
+        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(
+                                                       self.ce.uniprotID,
+                                                       self.ce.md5)
         test_data += '"file_set":[{{"accessed_count":{0},'.format(
                      self.f1.accessed_count)
         test_data += '"expiry_date":"{0}","file_type":{1},'.format(
@@ -81,12 +82,14 @@ class CacheEntryTests(APITestCase):
         date = str(f2.expiry_date)
         date = date[:10] + 'T' + date[11:]
         date = date[:26] + 'Z'
-        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(self.ce.uniprotID,
-                                                              self.ce.md5)
+        test_data = '{{"uniprotID":"{0}","md5":"{1}",'.format(
+                                                       self.ce.uniprotID,
+                                                       self.ce.md5)
         test_data += '"file_set":[{{"accessed_count":{0},'.format(
                      f2.accessed_count)
-        test_data += '"expiry_date":"{0}","file_type":{1},'.format(date,
-                                                                   f2.file_type)
+        test_data += '"expiry_date":"{0}","file_type":{1},'.format(
+                                                            date,
+                                                            f2.file_type)
         test_data += '"blast_hits":{0}}}]}}'.format(f2.blast_hits)
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
@@ -123,16 +126,16 @@ class CacheEntryTests(APITestCase):
 
     def test_reject_a_file_post_if_entry_exists(self):
         pass
-        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
+        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_an_existing_entry(self):
-        #self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
         pass
 
     def test_reject_update_if_entry_nonexistant(self):
         pass
-        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class UploadFileTests(APITestCase):
 
