@@ -37,6 +37,68 @@ class CacheDetails(mixins.RetrieveModelMixin,
     """
     lookup_field = 'md5'
 
+    def __prepare_data(self, request):
+        request_contents = request.data
+        data = {}
+        try:
+            data['md5'] = request_contents.pop('md5')[0]
+            data['hit_count'] = request_contents.pop('hit_count')[0]
+            data['uniprotID'] = request_contents.pop('uniprotID')[0]
+            data['runtime'] = request_contents.pop('runtime')[0]
+        except MultiValueDictKeyError:
+            raise MultiValueDictKeyError
+        except KeyError:
+            raise KeyError
+
+        return(data, request_contents)
+
+    def __pseudo_lock_write(self, write_file, lock_file, string):
+        if os.path.isfile(write_file):
+            while os.path.isfile(lock_file):
+                time.sleep(5)
+            open(lock_file, 'a').close()
+            f = open(write_file, 'a')
+            f.write(string)
+            f.flush()
+            f.close()
+            os.remove(lock_file)
+
+    def __insert_new_files(self, request, data, ce):
+        pssm_size = os.path.getsize(settings.USER_PSSM)
+        chk_size = os.path.getsize(settings.USER_CHK)
+        pssm_data = request.FILES['pssm_file'].read().decode("utf-8")
+        chk_data = request.FILES['chk_file'].read().decode("utf-8")
+        pssm_string = ">>>START FILE: "+data['uniprotID']+".pssm\n"
+        pssm_string += pssm_data+"\n"
+        pssm_string += ">>>STOP FILE: "+data['uniprotID']+".pssm\n"
+        chk_string = ">>>START FILE: "+data['uniprotID']+".chk\n"
+        chk_string += chk_data+"\n"
+        chk_string += ">>>STOP FILE: "+data['uniprotID']+".chk\n"
+
+        self.__pseudo_lock_write(settings.USER_CHK,
+                                 settings.CHK_LOCK, chk_string)
+        self.__pseudo_lock_write(settings.USER_PSSM,
+                                 settings.PSSM_LOCK, pssm_string)
+        pssm_start = pssm_size+20+len(data['uniprotID'])
+        pssm_stop = pssm_start+len(pssm_data)
+        chk_start = chk_size+19+len(data['uniprotID'])
+        chk_stop = chk_start+len(chk_data)
+
+        File.insert_file_details(ce=ce,
+                                 file_location=settings.USER_PSSM,
+                                 file_type=File.PSSM,
+                                 start=pssm_start,
+                                 stop=pssm_stop,
+                                 hits=data['hit_count'],
+                                 runtime=data['runtime'])
+        File.insert_file_details(ce=ce,
+                                 file_location=settings.USER_CHK,
+                                 file_type=File.CHK,
+                                 start=chk_start,
+                                 stop=chk_stop,
+                                 hits=data['hit_count'],
+                                 runtime=data['runtime'])
+
     def get_queryset(self):
         """
         Optionally restricts the returned purchases to a given user,
@@ -66,37 +128,27 @@ class CacheDetails(mixins.RetrieveModelMixin,
         """
         return self.retrieve(request, *args, **kwargs)
 
-    def update(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         """
             Update a PSI-BLAST result
         """
-        return self.retrieve(request, *args, **kwargs)
-
-    def __prepare_data(self, request):
         request_contents = request.data
-        data = {}
         try:
-            data['md5'] = request_contents.pop('md5')[0]
-            data['hit_count'] = request_contents.pop('hit_count')[0]
-            data['uniprotID'] = request_contents.pop('uniprotID')[0]
-            data['runtime'] = request_contents.pop('runtime')[0]
+            data, request_contents = self.__prepare_data(request)
         except MultiValueDictKeyError:
-            raise MultiValueDictKeyError
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
         except KeyError:
-            raise KeyError
+            content = {'error': "Input does not contain all required fields"}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
-        return(data, request_contents)
+        ce = Cache_entry.objects.filter(md5=data['md5'])
+        if len(ce) == 0:
+            return Response("Sequence not present",
+                            status=status.HTTP_400_BAD_REQUEST)
 
-    def __pseudo_lock_write(self, write_file, lock_file, string):
-        if os.path.isfile(write_file):
-            while os.path.isfile(lock_file):
-                time.sleep(5)
-            open(lock_file, 'a').close()
-            f = open(write_file, 'a')
-            f.write(string)
-            f.flush()
-            f.close()
-            os.remove(lock_file)
+        self.__insert_new_files(request, data, ce[0])
+        return Response("Your files updated", status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """
@@ -119,36 +171,10 @@ class CacheDetails(mixins.RetrieveModelMixin,
         if len(ce) > 0:
             return Response("Hey Yo", status=status.HTTP_400_BAD_REQUEST)
 
-        pssm_size = os.path.getsize(settings.USER_PSSM)
-        chk_size = os.path.getsize(settings.USER_CHK)
-        pssm_data = request.FILES['pssm_file'].read().decode("utf-8")
-        chk_data = request.FILES['chk_file'].read().decode("utf-8")
-        pssm_string = ">>>START FILE: "+data['uniprotID']+".pssm\n"
-        pssm_string += pssm_data+"\n"
-        pssm_string += ">>>STOP FILE: "+data['uniprotID']+".pssm\n"
-        chk_string = ">>>START FILE: "+data['uniprotID']+".chk\n"
-        chk_string += chk_data+"\n"
-        chk_string += ">>>STOP FILE: "+data['uniprotID']+".chk\n"
-
-        self.__pseudo_lock_write(settings.USER_CHK,
-                                 settings.CHK_LOCK, chk_string)
-        self.__pseudo_lock_write(settings.USER_PSSM,
-                                 settings.PSSM_LOCK, pssm_string)
-        pssm_start = pssm_size+20+len(data['uniprotID'])
-        pssm_stop = pssm_start+len(pssm_data)
-        chk_start = chk_size+19+len(data['uniprotID'])
-        chk_stop = chk_start+len(chk_data)
-
         ce = Cache_entry.objects.create(uniprotID=data['uniprotID'])
         ce.md5 = data['md5']
         ce.save()
-        File.insert_file_details(ce=ce,
-                                 file_location=settings.USER_PSSM,
-                                 file_type=File.PSSM,
-                                 start=pssm_start,
-                                 stop=pssm_stop,
-                                 hits=data['hit_count'],
-                                 runtime=data['runtime'])
+        self.__insert_new_files(request, data, ce)
         return Response("Your files were added", status=status.HTTP_201_CREATED)
 
 

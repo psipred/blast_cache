@@ -123,21 +123,38 @@ class CacheEntryTests(APITestCase):
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         files = File.objects.all()
-        self.assertEqual(len(files), 2)
+        self.assertEqual(len(files), 3)
         seqs = Cache_entry.objects.filter(uniprotID="P023423")
         self.assertEqual(len(seqs), 1)
 
     def test_reject_a_file_post_if_entry_exists(self):
-        pass
-        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        request = self.factory.post(reverse('cache'), self.inputdata,
+                                    format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        request = self.factory.post(reverse('cache'), self.inputdata,
+                                    format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_an_existing_entry(self):
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        pass
+        request = self.factory.post(reverse('cache'), self.inputdata,
+                                    format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        request = self.factory.put(reverse('cache'), self.inputdata,
+                                   format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_reject_update_if_entry_nonexistant(self):
-        pass
-        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        request = self.factory.put(reverse('cache'), self.inputdata,
+                                   format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_access_counter_incremented_on_each_get(self):
         pass
