@@ -40,15 +40,17 @@ class CacheEntryTests(APITestCase):
                           'chk_file': self.chk,
                           'md5': 'a452652e0879d22a04618efb004a03c5',
                           'hit_count': 500,
-                          'uniprotID': "P023423", }
+                          'uniprotID': "P023423",
+                          'runtime': 30 }
 
     def setUpClass():
         open(settings.USER_PSSM, 'a').close()
         open(settings.USER_CHK, 'a').close()
 
     def tearDownClass():
-        os.remove(settings.USER_PSSM)
-        os.remove(settings.USER_CHK)
+        # os.remove(settings.USER_PSSM)
+        # os.remove(settings.USER_CHK)
+        pass
 
     def tearDown(self):
         Cache_entry.objects.all().delete()
@@ -120,19 +122,26 @@ class CacheEntryTests(APITestCase):
         view = CacheDetails.as_view()
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        files = File.objects.all()
+        self.assertEqual(len(files), 2)
+        seqs = Cache_entry.objects.filter(uniprotID="P023423")
+        self.assertEqual(len(seqs), 1)
 
     def test_reject_a_file_post_if_entry_exists(self):
         pass
-        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
+        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_an_existing_entry(self):
-        #self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
         pass
 
     def test_reject_update_if_entry_nonexistant(self):
         pass
-        #self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_access_counter_incremented_on_each_get(self):
+        pass
+
 
 class UploadFileTests(APITestCase):
 

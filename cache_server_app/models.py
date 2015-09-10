@@ -1,3 +1,6 @@
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 from django.db import models
 
 
@@ -44,6 +47,20 @@ class File (TimeStampedModel):
     file_byte_stop = models.IntegerField(default=0, null=False, blank=False)
     cache_entry = models.ForeignKey(Cache_entry)
     blast_hits = models.IntegerField(default=0, null=False, blank=False)
+    runtime = models.IntegerField(default=0, null=True, blank=False)
+
+    def insert_file_details(ce, file_location, file_type,
+                            start, stop, hits, runtime):
+        exp_date = date.today() + relativedelta(months=+6)
+        f = File.objects.create(cache_entry=ce, expiry_date=exp_date)
+        f.accessed_count = 0
+        f.file_location = file_location
+        f.file_type = file_type
+        f.file_byte_start = start
+        f.file_byte_stop = stop
+        f.blast_hits = hits
+        runtime = runtime
+        f.save()
 
     def __str__(self):
         return str(self.pk)
