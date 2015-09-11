@@ -1,3 +1,5 @@
+>>>START FILE: all.pssm
+>>>STOP FILE: all.pssm
 >>>START FILE: P04591.pssm
 PssmWithParameters ::= {
   pssm {
@@ -66464,3 +66466,5 @@ PssmWithParameters ::= {
   }
 }
 >>>STOP FILE: Q92JM4.pssm
+>>>START FILE: user.pssm
+>>>STOP FILE: user.pssm

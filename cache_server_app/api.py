@@ -64,8 +64,8 @@ class CacheDetails(mixins.RetrieveModelMixin,
             os.remove(lock_file)
 
     def __insert_new_files(self, request, data, ce):
-        pssm_size = os.path.getsize(settings.USER_PSSM)
-        chk_size = os.path.getsize(settings.USER_CHK)
+        pssm_size = os.path.getsize(settings.USER_PSSM)+1
+        chk_size = os.path.getsize(settings.USER_CHK)+1
         pssm_data = request.FILES['pssm_file'].read().decode("utf-8")
         chk_data = request.FILES['chk_file'].read().decode("utf-8")
         pssm_string = ">>>START FILE: "+data['uniprotID']+".pssm\n"

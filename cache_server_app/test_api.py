@@ -25,6 +25,7 @@ class CacheEntryTests(APITestCase):
     ce = None
     fe = None
     data = {}
+    base = settings.BASE_DIR+"/files/"
 
     def setUp(self):
         self.ce = CacheEntryFactory.create()
@@ -49,8 +50,8 @@ class CacheEntryTests(APITestCase):
         open(settings.USER_CHK, 'a').close()
 
     def tearDownClass():
-        # os.remove(settings.USER_PSSM)
-        # os.remove(settings.USER_CHK)
+        os.remove(settings.USER_PSSM)
+        os.remove(settings.USER_CHK)
         pass
 
     def tearDown(self):
@@ -102,11 +103,10 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
     def test_with_proper_data_load_we_get_2_files(self):
-        base = settings.BASE_DIR+"/files/"
         request = self.factory.post(reverse('uploadFile'),
-                                    {'fasta_file': base+"all.fasta",
-                                     'pssm_file': base+"all.pssm",
-                                     'chk_file': base+"all.chk", })
+                                    {'fasta_file': self.base+"all.fasta",
+                                     'pssm_file': self.base+"all.pssm",
+                                     'chk_file': self.base+"all.chk", })
         view = UploadFile.as_view()
         response = view(request)
         md5 = "eb8783411250a01a2bfabb6926ffc2cc"
@@ -127,11 +127,10 @@ class CacheEntryTests(APITestCase):
 
     # If we upload some real data do we get the correct information back?
     def test_return_a_correct_entry(self):
-        base = settings.BASE_DIR+"/files/"
         request = self.factory.post(reverse('uploadFile'),
-                                    {'fasta_file': base+"all.fasta",
-                                     'pssm_file': base+"all.pssm",
-                                     'chk_file': base+"all.chk", })
+                                    {'fasta_file': self.base+"all.fasta",
+                                     'pssm_file': self.base+"all.pssm",
+                                     'chk_file': self.base+"all.chk", })
         view = UploadFile.as_view()
         response = view(request)
         md5 = "a452652e0879d22a04618efb004a03c5"
@@ -193,11 +192,10 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_access_counter_incremented_on_each_get(self):
-        base = settings.BASE_DIR+"/files/"
         request = self.factory.post(reverse('uploadFile'),
-                                    {'fasta_file': base+"all.fasta",
-                                     'pssm_file': base+"all.pssm",
-                                     'chk_file': base+"all.chk", })
+                                    {'fasta_file': self.base+"all.fasta",
+                                     'pssm_file': self.base+"all.pssm",
+                                     'chk_file': self.base+"all.chk", })
         view = UploadFile.as_view()
         response = view(request)
         md5 = "eb8783411250a01a2bfabb6926ffc2cc"
@@ -226,20 +224,49 @@ class CacheEntryTests(APITestCase):
                                            args=[md5, ]) + ".json")
         response.render()
         data = json.loads(response.content.decode("utf-8"))
-        print(data)
         for f in data['file_set']:
             file_name = "files/test.pssm"
-            test_data = "SOME PSSM CONTENT"
+            test_data = "SOME PSSM CONTENTS"
             if f['file_type'] == 2:
-                    file_name = "files/test.chk"
-                    test_data = "SOME CHK CONTENT"
-
+                file_name = "files/test.chk"
+                test_data = "SOME CHK CONTENTS"
             with open(file_name, "rb") as chkfile:
                 chkfile.seek(f['file_byte_start'])
                 bytelength = f['file_byte_stop'] - f['file_byte_start']
                 data = chkfile.read(bytelength)
                 line = data.decode("utf-8")
                 self.assertEqual(line, test_data)
+
+    def test_byte_values_allow_full_file_retrieval(self):
+        request = self.factory.post(reverse('uploadFile'),
+                                    {'fasta_file': self.base+"all.fasta",
+                                     'pssm_file': self.base+"all.pssm",
+                                     'chk_file': self.base+"all.chk", })
+        view = UploadFile.as_view()
+        response = view(request)
+        md5 = "eb8783411250a01a2bfabb6926ffc2cc"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        data = json.loads(response.content.decode("utf-8"))
+        test_data = ""
+
+        for f in data['file_set']:
+            file_name = "files/all.pssm"
+            with open("files/P04601.pssm") as testpssm:
+                test_data = testpssm.read()
+            if f['file_type'] == 2:
+                file_name = "files/all.chk"
+                with open("files/P04601.chk") as testchk:
+                    test_data = testchk.read()
+            with open(file_name, "rb") as chkfile:
+                chkfile.seek(f['file_byte_start'])
+                bytelength = f['file_byte_stop'] - f['file_byte_start']
+                data = chkfile.read(bytelength)
+                line = data.decode("utf-8")
+                # print(line)
+                self.assertEqual(line, test_data)
+
 
 class UploadFileTests(APITestCase):
 
