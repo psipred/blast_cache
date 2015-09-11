@@ -6,7 +6,8 @@ from .models import Cache_entry, File
 class FileOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('accessed_count', 'expiry_date', 'file_type', 'blast_hits')
+        fields = ('accessed_count', 'expiry_date', 'file_type', 'blast_hits',
+                  'file_byte_start', 'file_byte_stop')
 
 
 class CacheEntryOutputSerializer(serializers.ModelSerializer):

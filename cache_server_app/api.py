@@ -116,12 +116,16 @@ class CacheDetails(mixins.RetrieveModelMixin,
         try:
             f_pssm = File.objects.filter(cache_entry=ce,
                                          file_type=File.PSSM).latest()
+            f_pssm.accessed_count += 1
+            f_pssm.save()
         except:
             # Should warn that the record has no PSSM
             pass
         try:
             f_chk = File.objects.filter(cache_entry=ce,
                                         file_type=File.CHK).latest()
+            f_chk.accessed_count += 1
+            f_chk.save()
         except:
             # Should warn that the record has no CHK
             pass

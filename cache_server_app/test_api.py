@@ -42,7 +42,7 @@ class CacheEntryTests(APITestCase):
                           'md5': 'a452652e0879d22a04618efb004a03c5',
                           'hit_count': 500,
                           'uniprotID': "P023423",
-                          'runtime': 30 }
+                          'runtime': 30}
 
     def setUpClass():
         open(settings.USER_PSSM, 'a').close()
@@ -69,10 +69,12 @@ class CacheEntryTests(APITestCase):
                                                        self.ce.uniprotID,
                                                        self.ce.md5)
         test_data += '"file_set":[{{"accessed_count":{0},'.format(
-                     self.f1.accessed_count)
+                     self.f1.accessed_count+1)
         test_data += '"expiry_date":"{0}","file_type":{1},'.format(
                      date, self.f1.file_type)
-        test_data += '"blast_hits":{0}}}]}}'.format(self.f1.blast_hits)
+        test_data += '"blast_hits":{0},'.format(self.f1.blast_hits)
+        test_data += '"file_byte_start":{0},'.format(self.f1.file_byte_start)
+        test_data += '"file_byte_stop":{0}}}]}}'.format(self.f1.file_byte_stop)
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
     def test_get_returns_latest_files(self):
@@ -89,11 +91,14 @@ class CacheEntryTests(APITestCase):
                                                        self.ce.uniprotID,
                                                        self.ce.md5)
         test_data += '"file_set":[{{"accessed_count":{0},'.format(
-                     f2.accessed_count)
+                     f2.accessed_count+1)
         test_data += '"expiry_date":"{0}","file_type":{1},'.format(
                                                             date,
                                                             f2.file_type)
-        test_data += '"blast_hits":{0}}}]}}'.format(f2.blast_hits)
+        test_data += '"blast_hits":{0},'.format(f2.blast_hits)
+        test_data += '"file_byte_start":{0},'.format(f2.file_byte_start)
+        test_data += '"file_byte_stop":{0}}}]}}'.format(f2.file_byte_stop)
+
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
     def test_with_proper_data_load_we_get_2_files(self):
@@ -114,9 +119,9 @@ class CacheEntryTests(APITestCase):
         pssm_count = 0
         for f in data['file_set']:
             if f['file_type'] == 1:
-                pssm_count+=1
+                pssm_count += 1
             if f['file_type'] == 2:
-                chk_count+=1
+                chk_count += 1
         self.assertEqual(chk_count, 1)
         self.assertEqual(pssm_count, 1)
 
@@ -188,8 +193,31 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_access_counter_incremented_on_each_get(self):
-        pass
+        base = settings.BASE_DIR+"/files/"
+        request = self.factory.post(reverse('uploadFile'),
+                                    {'fasta_file': base+"all.fasta",
+                                     'pssm_file': base+"all.pssm",
+                                     'chk_file': base+"all.chk", })
+        view = UploadFile.as_view()
+        response = view(request)
+        md5 = "eb8783411250a01a2bfabb6926ffc2cc"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        data = json.loads(response.content.decode("utf-8"))
+        self.assertEqual(data['file_set'][0]['accessed_count'], 1)
+        self.assertEqual(data['file_set'][1]['accessed_count'], 1)
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        data = json.loads(response.content.decode("utf-8"))
+        self.assertEqual(data['file_set'][0]['accessed_count'], 2)
+        self.assertEqual(data['file_set'][1]['accessed_count'], 2)
+
         # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_byte_values_allow_correct_data_retrieval(self):
+        pass
 
 
 class UploadFileTests(APITestCase):
