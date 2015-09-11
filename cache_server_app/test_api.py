@@ -1,5 +1,6 @@
 import hashlib
 import os
+import json
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -95,8 +96,32 @@ class CacheEntryTests(APITestCase):
         test_data += '"blast_hits":{0}}}]}}'.format(f2.blast_hits)
         self.assertEqual(response.content.decode("utf-8"), test_data)
 
+    def test_with_proper_data_load_we_get_2_files(self):
+        base = settings.BASE_DIR+"/files/"
+        request = self.factory.post(reverse('uploadFile'),
+                                    {'fasta_file': base+"all.fasta",
+                                     'pssm_file': base+"all.pssm",
+                                     'chk_file': base+"all.chk", })
+        view = UploadFile.as_view()
+        response = view(request)
+        md5 = "eb8783411250a01a2bfabb6926ffc2cc"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        data = json.loads(response.content.decode("utf-8"))
+        self.assertEqual(len(data['file_set']), 2)
+        chk_count = 0
+        pssm_count = 0
+        for f in data['file_set']:
+            if f['file_type'] == 1:
+                pssm_count+=1
+            if f['file_type'] == 2:
+                chk_count+=1
+        self.assertEqual(chk_count, 1)
+        self.assertEqual(pssm_count, 1)
+
     # If we upload some real data do we get the correct information back?
-    def test_return_a_correct_pssm_and_chk(self):
+    def test_return_a_correct_entry(self):
         base = settings.BASE_DIR+"/files/"
         request = self.factory.post(reverse('uploadFile'),
                                     {'fasta_file': base+"all.fasta",
@@ -165,6 +190,7 @@ class CacheEntryTests(APITestCase):
     def test_access_counter_incremented_on_each_get(self):
         pass
         # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class UploadFileTests(APITestCase):
 

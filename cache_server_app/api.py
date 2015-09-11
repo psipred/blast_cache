@@ -110,10 +110,34 @@ class CacheDetails(mixins.RetrieveModelMixin,
         if len(ce) == 0:
             raise Http404
 
-        f = File.objects.filter(cache_entry=ce).latest()
+        f_pssm = None
+        f_chk = None
+        f = None
+        try:
+            f_pssm = File.objects.filter(cache_entry=ce,
+                                         file_type=File.PSSM).latest()
+        except:
+            # Should warn that the record has no PSSM
+            pass
+        try:
+            f_chk = File.objects.filter(cache_entry=ce,
+                                        file_type=File.CHK).latest()
+        except:
+            # Should warn that the record has no CHK
+            pass
+
+        if f_pssm is not None:
+            f = f_pssm
+        elif f_chk is not None:
+            f = f_chk
+
+        if f_pssm is not None and f_chk is not None:
+            if f_pssm.created > f_chk.created:
+                f = f_chk
+
         queryset = Cache_entry.objects.filter(md5=md5).prefetch_related(
                    Prefetch("file_set", queryset=File.objects.filter(
-                            created=f.created)))
+                            created__gte=f.created)))
         return queryset
 
     def get_serializer_class(self):
