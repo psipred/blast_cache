@@ -217,8 +217,29 @@ class CacheEntryTests(APITestCase):
         # self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_byte_values_allow_correct_data_retrieval(self):
-        pass
+        request = self.factory.post(reverse('cache'), self.inputdata,
+                                    format='multipart')
+        view = CacheDetails.as_view()
+        response = view(request)
+        md5 = "a452652e0879d22a04618efb004a03c5"
+        response = self.client.get(reverse('cacheDetail',
+                                           args=[md5, ]) + ".json")
+        response.render()
+        data = json.loads(response.content.decode("utf-8"))
+        print(data)
+        for f in data['file_set']:
+            file_name = "files/test.pssm"
+            test_data = "SOME PSSM CONTENT"
+            if f['file_type'] == 2:
+                    file_name = "files/test.chk"
+                    test_data = "SOME CHK CONTENT"
 
+            with open(file_name, "rb") as chkfile:
+                chkfile.seek(f['file_byte_start'])
+                bytelength = f['file_byte_stop'] - f['file_byte_start']
+                data = chkfile.read(bytelength)
+                line = data.decode("utf-8")
+                self.assertEqual(line, test_data)
 
 class UploadFileTests(APITestCase):
 
