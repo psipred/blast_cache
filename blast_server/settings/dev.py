@@ -11,7 +11,7 @@ with open(os.path.join(DEV_SECRETS_PATH)) as f: secrets = json.loads(f.read())
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'psipred_cache_db',
+        'NAME': 'blast_cache',
         'USER': get_secret("USER", secrets),
         'PASSWORD': get_secret("PASSWORD", secrets),
         'HOST': 'localhost',

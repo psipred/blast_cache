@@ -61,7 +61,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cache_server_app',
+    'blast_server_app',
     'rest_framework',
 )
 
@@ -76,7 +76,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'cache_server.urls'
+ROOT_URLCONF = 'blast_server.urls'
 
 TEMPLATES = [
     {
@@ -94,7 +94,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'cache_server.wsgi.application'
+WSGI_APPLICATION = 'blast_server.wsgi.application'
 
 
 # Database

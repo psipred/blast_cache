@@ -203,7 +203,8 @@ class CacheDetails(mixins.RetrieveModelMixin,
         ce.md5 = data['md5']
         ce.save()
         self.__insert_new_files(request, data, ce)
-        return Response("Your files were added", status=status.HTTP_201_CREATED)
+        return Response("Your files were added",
+                        status=status.HTTP_201_CREATED)
 
 
 class UploadFile(mixins.CreateModelMixin,

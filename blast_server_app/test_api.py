@@ -295,7 +295,7 @@ class UploadFileTests(APITestCase):
 
     def test_upload_fails_with_missing_file(self):
         request = self.factory.post(reverse('uploadFile'),
-                                    {'fasta_file': self.base+"dall.fasta",
+                                    {'fasta_file': self.base+"all.fasta",
                                      'pssm_file': self.base+"all.pssm",
                                      'chk_file': self.base+"all.chk", })
         view = UploadFile.as_view()
