@@ -15,22 +15,22 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from blast_server_app import api
+from blast_cache_app import api
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^blast_server/', include('blast_server_app.urls')),
-    url(r'^blast_server/$',
+    url(r'^blast_cache/', include('blast_cache_app.urls')),
+    url(r'^blast_cache/$',
         api.CacheDetails.as_view(),
         name="cache"),
-    url(r'^blast_server/(?P<md5>\S{32})$',
+    url(r'^blast_cache/(?P<md5>\S{32})$',
         api.CacheDetails.as_view(),
         name="cacheDetail"),
-    url(r'^blast_server/upload/$', api.UploadFile.as_view(), name="uploadFile"),
-    url(r'^login/$', 'django.contrib.auth.views.login'),
-    url(r'^logout/$', 'django.contrib.auth.views.logout'),
+    url(r'^login/$', auth_views.login),
+    url(r'^logout/$', auth_views.logout),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])

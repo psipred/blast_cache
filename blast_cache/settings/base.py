@@ -38,8 +38,6 @@ BASE_SECRETS_PATH = SETTINGS_PATH.child("base_secrets.json")
 with open(os.path.join(BASE_SECRETS_PATH)) as \
     f: base_secrets = json.loads(f.read())
 
-CHK_LOCK = BASE_DIR+"/files/chk.lock"
-PSSM_LOCK = BASE_DIR+"/files/pssm.lock"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -61,7 +59,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'blast_server_app',
+    'django.contrib.postgres',
+    'blast_cache_app',
     'rest_framework',
 )
 
@@ -74,9 +73,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
-ROOT_URLCONF = 'blast_server.urls'
+ROOT_URLCONF = 'blast_cache.urls'
 
 TEMPLATES = [
     {
@@ -94,7 +94,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'blast_server.wsgi.application'
+WSGI_APPLICATION = 'blast_cache.wsgi.application'
 
 
 # Database

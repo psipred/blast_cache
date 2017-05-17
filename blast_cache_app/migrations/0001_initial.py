@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('file_byte_stop', models.IntegerField(default=0)),
                 ('blast_hits', models.IntegerField(default=0)),
                 ('runtime', models.IntegerField(null=True, default=0)),
-                ('cache_entry', models.ForeignKey(to='blast_server_app.Cache_entry')),
+                ('cache_entry', models.ForeignKey(to='blast_cache_app.Cache_entry')),
             ],
             options={
                 'get_latest_by': 'created',
