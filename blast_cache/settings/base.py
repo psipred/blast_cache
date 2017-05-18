@@ -20,6 +20,7 @@ from unipath import Path
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 
+
 def get_secret(setting, secrets):
     """Get the secret variable or return explicit exception."""
     try:
@@ -28,11 +29,13 @@ def get_secret(setting, secrets):
         error_msg = "Set the {0} environment variable".format(setting)
         raise ImproperlyConfigured(error_msg)
 
+
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 BASE_DIR = Path(__file__).ancestor(3)
 TEMPLATE_PATH = BASE_DIR.child("templates")
 STATIC_PATH = BASE_DIR.child("static")
 SETTINGS_PATH = Path(__file__).ancestor(1)
+CACHE_EXPIRY_PERIOD = 180
 
 BASE_SECRETS_PATH = SETTINGS_PATH.child("base_secrets.json")
 with open(os.path.join(BASE_SECRETS_PATH)) as \

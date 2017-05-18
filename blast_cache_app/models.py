@@ -32,7 +32,7 @@ class Cache_entry (TimeStampedModel):
     md5 = models.CharField(max_length=64, unique=False, null=False,
                            blank=False, db_index=True)
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
-    expiry_date = models.DateField(auto_now_add=False)
+    expiry_date = models.DateField(auto_now_add=False)  # set on save
     file_type = models.IntegerField(null=False, blank=False,
                                     choices=FILE_CHOICES, default=CHK)
     blast_hit_count = models.IntegerField(default=0, null=False, blank=False)

@@ -54,7 +54,7 @@ class CacheEntryTests(APITestCase):
         Cache_entry.objects.all().delete()
 
     def test_get_returns_entry_with_md5(self):
-        response = self.client.get(reverse('cacheDetail',
+        response = self.client.get(reverse('entryDetail',
                                            args=[self.ce.md5, ]) + ".json")
         response.render()
         self.assertEqual(response.status_code, 200)
