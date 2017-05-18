@@ -57,19 +57,3 @@ class CacheEntrySerializer(serializers.ModelSerializer):
         )
         entry.save()
         return entry
-
-    # TODO: update
-    # TODO: get
-
-    # id = serializers.IntegerField(read_only=True, )
-    # name = serializers.CharField(required=True, allow_blank=False,
-    #                              max_length=128)
-    # md5 = serializers.CharField(required=True, allow_blank=False,
-    #                             max_length=64)
-    # accessed_count = serializers.IntegerField(read_only=True, )
-    # expiry_date = serializers.DateField(read_only=True, )
-    # file_type = serializers.ChoiceField(choices=Cache_entry.FILE_CHOICES,
-    #                                     required=True, allow_blank=False,)
-    # blast_hit_count = serializers.IntegerField(required=True, )
-    # runtime = serializers.IntegerField(required=True, )
-    # data = HStoreField(required=True)

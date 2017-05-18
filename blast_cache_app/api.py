@@ -1,3 +1,5 @@
+import datetime
+
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,21 +9,27 @@ from .models import Cache_entry
 from .serializers import CacheEntrySerializer
 
 
+class FullList(APIView):
+    """
+        list everything in the cache
+    """
+    def get(self, request, format=None):
+        entries = Cache_entry.objects.all()
+        # should remove entries where today's date is > expiry date
+        serializer = CacheEntrySerializer(entries, many=True)
+        return Response(serializer.data)
+
+
 class EntryList(APIView):
     """
-        List all cache entries
+        List all cache entries with a given md5
     """
-    # def get(self, request, format=None):
-    #     entries = Cache_entry.objects.all()
-    #     serializer = CacheEntrySerializer(entries, many=True)
-    #     return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = CacheEntrySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # change to only list things with same md5
+    def get(self, request, md5, format=None):
+        entries = Cache_entry.objects.all().filter(md5=md5)
+        # should remove entries where today's date is > expiry date
+        serializer = CacheEntrySerializer(entries, many=True)
+        return Response(serializer.data)
 
 
 class EntryDetail(APIView):
@@ -35,22 +43,36 @@ class EntryDetail(APIView):
             raise Http404
 
     def get(self, request, md5, format=None):
-        entry = self.get_object(md5)
+        hstore_key_list = ["file_data", ]
+        entry = Cache_entry.objects.get(md5=md5,
+                                        expiry_date__gte=datetime.date.today(),
+                                        data__contains=request.GET,)
+        # we should not return if today's date is > expiry date
         serializer = CacheEntrySerializer(entry)
+        entry.accessed_count += 1
+        entry.save()
         return Response(serializer.data)
 
-    def put(self, request, md5, format=None):
-        entry = self.get_object(md5)
-        serializer = CacheEntrySerializer(entry, data=request.data)
+    def post(self, request, format=None):
+        serializer = CacheEntrySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, md5, format=None):
-        entry = self.get_object(md5)
-        entry.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # def put(self, request, md5, format=None):
+    #     entry = self.get_object(md5)
+    #     serializer = CacheEntrySerializer(entry, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def delete(self, request, md5, format=None):
+    #     entry = self.get_object(md5)
+    #     entry.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 # from datetime import date
 # from dateutil.relativedelta import relativedelta

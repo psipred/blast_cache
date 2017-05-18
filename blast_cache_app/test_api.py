@@ -59,15 +59,8 @@ class CacheEntryTests(APITestCase):
     def tearDown(self):
         Cache_entry.objects.all().delete()
 
-    def test_get_returns_entry_with_md5(self):
-        response = self.client.get(reverse('entryDetail',
-                                           args=[self.ce.md5, ]) + ".json")
-        response.render()
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("-num_iterations", response.content.decode("utf-8"))
-
     def test_post_record(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"file_data": "SOME FILE DATA YO"}
@@ -78,7 +71,7 @@ class CacheEntryTests(APITestCase):
         # self.assertEqual(Cache_entry.objects.get().name, 'DabApps')
 
     def test_load_initialises_count_to_zero(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"file_data": "SOME FILE DATA YO"}
@@ -88,7 +81,7 @@ class CacheEntryTests(APITestCase):
                         Cache_entry.objects.get(name="test").accessed_count, 0)
 
     def test_expiry_date_set_correctly(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"file_data": "SOME FILE DATA YO"}
@@ -100,7 +93,7 @@ class CacheEntryTests(APITestCase):
                         datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD))
 
     def test_reject_data_if_malformatted(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": 0
@@ -112,7 +105,7 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reject_data_with_no_file_data_key(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"--num_iterations": 20}
@@ -124,7 +117,7 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reject_data_with_no_file_data(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"file_data": ""}
@@ -136,7 +129,7 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_reject_with_no_data_for_custom_key(self):
-        url = reverse('entryList')
+        url = reverse('entryDetail')
         data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
                 'runtime': '80', "blast_hit_count": "500",
                 "data": {"file_data": "SOME DATA YO", "--num_iterations": ""}
@@ -146,3 +139,36 @@ class CacheEntryTests(APITestCase):
                          "{\"data\":[\"You have passsed --num_iterations with"
                          " no data\"]}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_reject_with_existing_ids_and_valid_expiry_present(self):
+        pass
+
+    def test_accept_with_existing_ids_and_invalid_expiry_present(self):
+        pass
+
+#### GET TESTS BELOW
+
+    def test_get_returns_entry_with_md5(self):
+        response = self.client.get(reverse('entryDetail',
+                                           args=[self.ce.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("-num_iterations", response.content.decode("utf-8"))
+
+    def test_no_return_for_expired_entries(self):
+        pass
+
+    def test_accessed_count_increments_with_each_request(self):
+        pass
+
+    def test_return_list_with_same_md5(self):
+        pass
+
+    def test_return_single_from_list_with_specific_query(self):
+        pass
+
+    def test_return_nothing_if_md5_does_not_exist(self):
+        pass
+
+    def test_return_nothing_if_md5_and_custom_key_set_does_not_exist(self):
+        pass

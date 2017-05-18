@@ -27,7 +27,7 @@ class Cache_entry (TimeStampedModel):
         (PSSM, "pssm"),
         (CHK, "chk"),
     )
-    name = models.CharField(max_length=128, unique=True, null=False,
+    name = models.CharField(max_length=128, unique=False, null=False,
                             blank=False, db_index=True)
     md5 = models.CharField(max_length=64, unique=False, null=False,
                            blank=False, db_index=True)
