@@ -29,7 +29,7 @@ urlpatterns = [
     # url(r'^blast_cache/(?P<md5>\S{32})$',
     #     api.CacheDetails.as_view(),
     #     name="cacheDetail"),
-    url(r'^blast_cache/$', api.EntryList.as_view()),
+    url(r'^blast_cache/$', api.EntryList.as_view(), name="entryList"),
     url(r'^blast_cache/(?P<md5>\S{32})$', api.EntryDetail.as_view(),
         name="entryDetail"),
     url(r'^login/$', auth_views.login),

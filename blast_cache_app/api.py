@@ -11,10 +11,10 @@ class EntryList(APIView):
     """
         List all cache entries
     """
-    def get(self, request, format=None):
-        entries = Cache_entry.objects.all()
-        serializer = CacheEntrySerializer(entries, many=True)
-        return Response(serializer.data)
+    # def get(self, request, format=None):
+    #     entries = Cache_entry.objects.all()
+    #     serializer = CacheEntrySerializer(entries, many=True)
+    #     return Response(serializer.data)
 
     def post(self, request, format=None):
         serializer = CacheEntrySerializer(data=request.data)

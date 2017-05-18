@@ -1,6 +1,8 @@
 import hashlib
 import os
 import json
+import random
+import datetime
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -26,8 +28,13 @@ class CacheEntryTests(APITestCase):
     fe = None
     data = {}
     base = settings.BASE_DIR+"/files/"
+    md5 = None
 
     def setUp(self):
+        test_seq = random_string(length=240)
+        m = hashlib.md5()
+        test_hash = m.update(test_seq.encode('utf-8'))
+        self.md5 = m.hexdigest()
         self.ce = CacheEntryFactory.create()
 
         self.pssm = SimpleUploadedFile('test.pssm',
@@ -49,7 +56,6 @@ class CacheEntryTests(APITestCase):
     # def tearDownClass():
     #     os.remove(settings.USER_PSSM)
     #     os.remove(settings.USER_CHK)
-
     def tearDown(self):
         Cache_entry.objects.all().delete()
 
@@ -59,3 +65,84 @@ class CacheEntryTests(APITestCase):
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn("-num_iterations", response.content.decode("utf-8"))
+
+    def test_post_record(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME FILE DATA YO"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Cache_entry.objects.count(), 2)
+        # self.assertEqual(Cache_entry.objects.get().name, 'DabApps')
+
+    def test_load_initialises_count_to_zero(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME FILE DATA YO"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(
+                        Cache_entry.objects.get(name="test").accessed_count, 0)
+
+    def test_expiry_date_set_correctly(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME FILE DATA YO"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(
+                        Cache_entry.objects.get(
+                         name="test").expiry_date, datetime.date.today() +
+                        datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD))
+
+    def test_reject_data_if_malformatted(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": 0
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.content.decode("utf-8"),
+                         "{\"data\":[\"Expected a dictionary of items but got"
+                         " type \\\"int\\\".\"]}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_reject_data_with_no_file_data_key(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"--num_iterations": 20}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.content.decode("utf-8"),
+                         "{\"data\":[\"file_data must be present in data "
+                         "field\"]}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_reject_data_with_no_file_data(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": ""}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.content.decode("utf-8"),
+                         "{\"data\":[\"You have passsed file_data with no "
+                         "data\"]}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_reject_with_no_data_for_custom_key(self):
+        url = reverse('entryList')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME DATA YO", "--num_iterations": ""}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.content.decode("utf-8"),
+                         "{\"data\":[\"You have passsed --num_iterations with"
+                         " no data\"]}")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
