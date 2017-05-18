@@ -16,6 +16,7 @@ DATABASES = {
         'PASSWORD': get_secret("PASSWORD", secrets),
         'HOST': 'localhost',
         'PORT': '5432',
+        'TEST': {'TEMPLATE': 'hstemplate'},
     }
 }
 
@@ -29,5 +30,5 @@ INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 MEDIA_URL = '/submissions/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'submissions')
 
-USER_CHK = BASE_DIR+"/files/test.chk"
-USER_PSSM = BASE_DIR+"/files/test.pssm"
+USER_CHK = BASE_DIR+"/files/P04591.chk"
+USER_PSSM = BASE_DIR+"/files/P04591.pssm"

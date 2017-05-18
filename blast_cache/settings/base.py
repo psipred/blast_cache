@@ -60,8 +60,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
-    'blast_cache_app',
     'rest_framework',
+    'blast_cache_app.apps.BlastCacheAppConfig',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -93,6 +93,12 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    # ]
+}
 
 WSGI_APPLICATION = 'blast_cache.wsgi.application'
 

@@ -23,14 +23,18 @@ from blast_cache_app import api
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^blast_cache/', include('blast_cache_app.urls')),
-    url(r'^blast_cache/$',
-        api.CacheDetails.as_view(),
-        name="cache"),
-    url(r'^blast_cache/(?P<md5>\S{32})$',
-        api.CacheDetails.as_view(),
-        name="cacheDetail"),
+    # url(r'^blast_cache/$',
+    #     api.CacheDetails.as_view(),
+    #     name="cache"),
+    # url(r'^blast_cache/(?P<md5>\S{32})$',
+    #     api.CacheDetails.as_view(),
+    #     name="cacheDetail"),
+    url(r'^blast_cache/$', api.EntryList.as_view()),
+    url(r'^blast_cache/(?P<md5>\S{32})$', api.EntryDetail.as_view()),
     url(r'^login/$', auth_views.login),
     url(r'^logout/$', auth_views.logout),
+    url(r'^api-auth/', include('rest_framework.urls',
+        namespace='rest_framework')),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
+urlpatterns = format_suffix_patterns(urlpatterns, allowed=['json', 'html', ])

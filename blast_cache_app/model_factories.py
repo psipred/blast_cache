@@ -28,7 +28,7 @@ def read_file(type):
     if type == 2:
         path = settings.USER_CHK
     data = ''
-    with open('data.txt', 'r') as myfile:
+    with open(path, 'r') as myfile:
         data = myfile.read()
     return(data)
 
@@ -40,11 +40,11 @@ class CacheEntryFactory(factory.DjangoModelFactory):
     expiry_date = factory.fuzzy.FuzzyDateTime(
                   datetime.datetime(2008, 1, 1, tzinfo=pytz.utc))
     file_type = random.randint(1, 2)
-    blast_hits = random.randint(0, 5000)
+    blast_hit_count = random.randint(0, 5000)
     runtime = random.randint(0, 600)
     data = {"-num_iterations": random.randint(1, 6),
             "-num_descriptions": random.randint(1, 5000),
-            "file_data": read_file(self.file_type)}
+            "file_data": read_file(file_type)}
 
     class Meta:
         model = Cache_entry
