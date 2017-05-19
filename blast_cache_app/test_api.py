@@ -30,6 +30,12 @@ class CacheEntryTests(APITestCase):
     base = settings.BASE_DIR+"/files/"
     md5 = None
 
+    def read_pssm(self):
+        path = settings.USER_PSSM
+        with open(path, 'r') as myfile:
+            data = myfile.read()
+        return(data)
+
     def setUp(self):
         test_seq = random_string(length=240)
         m = hashlib.md5()
@@ -140,35 +146,219 @@ class CacheEntryTests(APITestCase):
                          " no data\"]}")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_reject_with_existing_ids_and_valid_expiry_present(self):
-        pass
+    def test_reject_post_with_existing_ids_and_valid_expiry_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        url = reverse('entryDetail')
+        data = {'name': 'test', 'md5': 'ac1a602a913db2ab48fbf5b1a9e1269a',
+                'file_type': 1, 'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME DATA YO",
+                         "-num_iterations": "20",
+                         "-num_descriptions": "500"}
+                }
 
-    def test_accept_with_existing_ids_and_invalid_expiry_present(self):
-        pass
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
-#### GET TESTS BELOW
+    def test_accept_post_with_existing_ids_and_expired_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        url = reverse('entryDetail')
+        data = {'name': 'test', 'md5': 'ac1a602a913db2ab48fbf5b1a9e1269a',
+                'file_type': 1, 'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME DATA YO",
+                         "-num_iterations": "20",
+                         "-num_descriptions": "500"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_accept_post_with_existing_ids_and_multiple_expired_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD+50),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+
+        url = reverse('entryDetail')
+        data = {'name': 'test', 'md5': 'ac1a602a913db2ab48fbf5b1a9e1269a',
+                'file_type': 1, 'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME DATA YO",
+                         "-num_iterations": "20",
+                         "-num_descriptions": "500"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+# GET TESTS BELOW
 
     def test_get_returns_entry_with_md5(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD))
         response = self.client.get(reverse('entryDetail',
-                                           args=[self.ce.md5, ]) + ".json")
+                                           args=[ce1.md5, ]) + ".json")
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn("-num_iterations", response.content.decode("utf-8"))
 
     def test_no_return_for_expired_entries(self):
-        pass
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD))
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.content.decode("utf-8"),
+                         "\"No Record Available\"")
 
     def test_accessed_count_increments_with_each_request(self):
-        pass
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       accessed_count=0)
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("\"accessed_count\":1", response.content.decode("utf-8"))
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("\"accessed_count\":2", response.content.decode("utf-8"))
 
     def test_return_list_with_same_md5(self):
-        pass
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryList',
+                                           args=[ce1.md5, ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(json.loads(response.content.decode("utf-8"))), 2)
 
-    def test_return_single_from_list_with_specific_query(self):
-        pass
-
-    def test_return_nothing_if_md5_does_not_exist(self):
-        pass
+    def test_return_single_when_list_exists_with_specific_query(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
+        response.render()
+        self.assertEqual(response.status_code, 200)
 
     def test_return_nothing_if_md5_and_custom_key_set_does_not_exist(self):
-        pass
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_alignments"
+                                                             "=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
+        response.render()
+        self.assertEqual(response.status_code, 404)
+
+    def test_return_no_list_if_md5_does_not_exist(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryList',
+                                           args=["bc1a602a913db2ab48fbf5b1a9"
+                                                 "e1269a", ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.content.decode("utf-8"),
+                         "\"No Records Available\"")
+
+    def test_return_nothing_if_list_members_all_expired(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryList',
+                                           args=["bc1a602a913db2ab48fbf5b1a9"
+                                                 "e1269a", ]) + ".json")
+        response.render()
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.content.decode("utf-8"),
+                         "\"No Records Available\"")

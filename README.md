@@ -21,7 +21,13 @@ files.
 7. Add 'manage.py createsuperuser'
 
 ## API
+1. GET
+* blast_cache/list/ : List every single entry in the db
+* blast_cache/list/[MD5] : list all unexpired entries in the db with this MD5
+* blast_cache/entry/[MD5]?[param...]=[value]... : retrieve unexpired single unique record given MD5 and uniquely specifying params
 
+2. POST
+* blast_cache/entry
 
 ## Test with
 python manage.py test --settings=blast_cache.settings.dev

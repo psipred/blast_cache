@@ -31,9 +31,9 @@ class CacheEntrySerializer(serializers.ModelSerializer):
         if isinstance(data, str):
             try:
                 data = json.loads(value)
-            except:
-                raise serializers.ValidationError("Data field does not look like "
-                                                  "python dict/json")
+            except Exception as e:
+                raise serializers.ValidationError("Data field does not look "
+                                                  "like python dict/json")
         if "file_data" not in data:
             raise serializers.ValidationError("file_data must be present in "
                                               "data field")
