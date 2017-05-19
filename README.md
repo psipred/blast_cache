@@ -29,15 +29,14 @@ files.
 2. POST Requests
 * blast_cache/entry : required fields include
 
-### Requiered POST parameters
+### Required POST parameters
 
-* Name: A short easy to remember identifier for the cache entry
+* name: A short easy to remember identifier for the cache entry
 * md5:  The md5 hash of the protein sequence for the cache entry
 * file_type: An integer reflecting the file type; 1: PSSM, 2: CHK
 * blast_hit_count: An integer listing the number of blast hits
 * runtime: An integer listing the blast runtime in seconds
 * data: A dict containing the file_data (required)
-
 
 ## Test with
 python manage.py test --settings=blast_cache.settings.dev
