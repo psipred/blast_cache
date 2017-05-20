@@ -7,6 +7,7 @@ import os.path
 from Bio.Blast import NCBIXML
 import time
 import math
+import json
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -94,8 +95,9 @@ if r.status_code == 404 and "No Record Available" in r.text:
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 1, "md5": md5,
                   "blast_hit_count": hit_count, "runtime": runtime,
-                  "data": str({'file_data': "Data yo", "-num_iterations": "5"}),
+                  "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
+    print(entry_data['data'])
     r = requests.post(entry_uri, data=entry_data)
     print(r.status_code)
     print(r.text)
