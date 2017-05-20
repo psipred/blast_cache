@@ -73,7 +73,8 @@ class EntryDetail(APIView):
         data_copy['blast_hit_count'] = request.data['blast_hit_count']
         data_copy['data'] = request.data['data']
 
-        if type(data_copy['data']) is not dict:
+        if type(data_copy['data']) is not dict and \
+           type(data_copy['data']) is str:
             try:
                 data_copy['data'] = data_copy['data'].replace("'", '"')
                 data_copy['data'] = json.loads(data_copy['data'])

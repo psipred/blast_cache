@@ -28,7 +28,6 @@ class CacheEntrySerializer(serializers.ModelSerializer):
         }
 
     def validate_data(self, data):
-        print(data)
         if isinstance(data, str):
             try:
                 data = json.loads(value)
