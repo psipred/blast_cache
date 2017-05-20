@@ -6,6 +6,7 @@ import shlex
 import os.path
 from Bio.Blast import NCBIXML
 import time
+import math
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -15,6 +16,8 @@ import time
 
 #
 # python scripts/run_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/ncbi-blast-2.2.31+/bin/ /scratch1/NOT_BACKED_UP/dbuchan/uniref/pdb_aa.fasta -num_iterations 20 -num_alignments 500 -num_threads 2
+#
+# python scripts/run_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/ncbi-blast-2.5.0+/bin/ /opt/uniref/uniref90.fasta -num_iterations 20 -num_alignments 500 -num_threads 2
 
 
 def read_file(path):
@@ -85,14 +88,13 @@ if r.status_code == 404 and "No Record Available" in r.text:
                          stderr=subprocess.PIPE)
     p.wait()
     end_time = time.time()
-    runtime = end_time-start_time
+    runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".pssm")
     request_data["file_data"] = pssm_data
-
     entry_data = {"name": seq_name, "file_type": 1, "md5": md5,
-                  "blast_hit_count": hit_count, "runtime": str(runtime),
-                  "data": request_data
+                  "blast_hit_count": hit_count, "runtime": runtime,
+                  "data": str({'file_data': "Data yo", "-num_iterations": "5"}),
                   }
     r = requests.post(entry_uri, data=entry_data)
     print(r.status_code)

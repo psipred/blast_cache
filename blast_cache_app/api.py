@@ -1,4 +1,6 @@
 import datetime
+import json
+import copy
 
 from django.http import Http404
 from rest_framework.views import APIView
@@ -63,10 +65,26 @@ class EntryDetail(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = CacheEntrySerializer(data=request.data)
+        data_copy = {}
+        data_copy['name'] = request.data['name']
+        data_copy['md5'] = request.data['md5']
+        data_copy['file_type'] = request.data['file_type']
+        data_copy['runtime'] = request.data['runtime']
+        data_copy['blast_hit_count'] = request.data['blast_hit_count']
+        data_copy['data'] = request.data['data']
+
+        if type(data_copy['data']) is not dict:
+            try:
+                data_copy['data'] = data_copy['data'].replace("'", '"')
+                data_copy['data'] = json.loads(data_copy['data'])
+            except Exception as e:
+                return Response("Data malformatted: "+str(e),
+                                status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = CacheEntrySerializer(data=data_copy)
         if serializer.is_valid():
             entry = None
-            search_components = serializer.validated_data['data']
+            search_components = copy.deepcopy(serializer.validated_data['data'])
             search_components.pop('file_data', None)
             try:
                 entry = Cache_entry.objects.get(
@@ -76,7 +94,6 @@ class EntryDetail(APIView):
             except Exception as e:
                 pass
             if entry is not None:
-
                 return Response("Valid Record Available",
                                 status=status.HTTP_409_CONFLICT)
 
