@@ -97,10 +97,27 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
-    print(entry_data['data'])
+    # print(entry_data['data'])
     r = requests.post(entry_uri, data=entry_data)
     print(r.status_code)
     print(r.text)
 else:
     # get blast file from cache
-    pass
+    if r.status_code == 200:
+        response_data = json.loads(r.text)
+        if 'data' in response_data:
+            response_data['data']['file_data'] = \
+            response_data['data']['file_data'].replace('seq-data ncbistdaa "',
+                                                       "seq-data ncbistdaa '")
+            response_data['data']['file_data'] = \
+            response_data['data']['file_data'].replace('"H\n',
+                                                       "'H\n")
+
+            f = open(seq_name+".pssm", 'w')
+            f.write(response_data['data']['file_data']+'\n')
+            f.close
+        # print(response_data['data'])
+
+    else:
+        # panic
+        exit(1)
