@@ -10,9 +10,9 @@ files.
 3. Add blast_cache db to postgres
 4. Enable hstore extension (CREATE EXTENSION hstore)
 5. Create test template for the test db
-    CREATE DATABASE hstemplate
+    CREATE DATABASE hstemplate;
     \c hstemplate
-    CREATE EXTENSION hstore
+    CREATE EXTENSION hstore;
     update pg_database set datistemplate=true  where datname='hstemplate';
 5. Add blast_cache_user to postgres
     CREATE USER blast_cache_user WITH PASSWORD '';
