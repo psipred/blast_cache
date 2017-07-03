@@ -6,7 +6,7 @@ files.
 ## Installation
 
 1. yum install postgresql-contrib (for hstore extension)
-2. pip install -r requirements/bast.txt
+2. pip install -r requirements/base.txt
 3. Add blast_cache db to postgres
 4. Enable hstore extension (CREATE EXTENSION hstore)
 5. Create test template for the test db
