@@ -78,6 +78,7 @@ i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, data=request_data)
+print("Cache Response:", r.statust_code, r.text)
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
@@ -112,7 +113,6 @@ else:
             response_data['data']['file_data'] = \
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
-
             f = open(seq_name+".pssm", 'w')
             f.write(response_data['data']['file_data']+'\n')
             f.close
