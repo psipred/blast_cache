@@ -60,6 +60,10 @@ def get_pssm_data(path):
     return(pssm_data)
 
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
+
 fasta_file = sys.argv[1]  # path to input fasta
 out_dir = sys.argv[2]  # path to place blast output and PSSM files
 base_uri = sys.argv[3]  # ip or URI for the server blast_cache is running on
@@ -78,7 +82,7 @@ i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, data=request_data)
-print("Cache Response:", r.statust_code, r.text)
+print("Cache Response:", r.status_code, r.text)
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
@@ -100,8 +104,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   }
     # print(entry_data['data'])
     r = requests.post(entry_uri, data=entry_data)
-    print(r.status_code)
-    print(r.text)
+    print("Submission Response:", r.status_code, r.text)
 else:
     # get blast file from cache
     if r.status_code == 200:
@@ -116,8 +119,7 @@ else:
             f = open(seq_name+".pssm", 'w')
             f.write(response_data['data']['file_data']+'\n')
             f.close
-        # print(response_data['data'])
-
     else:
         # panic
+        eprint("Blast cache request returned nether 404 or 200!!!")
         exit(1)
