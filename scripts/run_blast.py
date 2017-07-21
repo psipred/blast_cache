@@ -104,7 +104,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   }
     # print(entry_data['data'])
     r = requests.post(entry_uri, data=entry_data)
-    print("Submission Response:", r.status_code, r.text)
+    print("Submission Response:", r.status_code)
 else:
     # get blast file from cache
     if r.status_code == 200:
@@ -117,6 +117,9 @@ else:
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
             f = open(seq_name+".pssm", 'w')
+            # before printing we should really
+            # sanity check that data is a
+            # psiblast pssm
             f.write(response_data['data']['file_data']+'\n')
             f.close
     else:
