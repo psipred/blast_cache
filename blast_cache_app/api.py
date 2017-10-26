@@ -1,6 +1,8 @@
 import datetime
 import json
 import copy
+import hashlib
+from sortedcontainers import SortedDict
 
 from django.http import Http404
 from rest_framework.views import APIView
@@ -82,6 +84,16 @@ class EntryDetail(APIView):
                 return Response("Data malformatted: "+str(e),
                                 status=status.HTTP_400_BAD_REQUEST)
 
+        settings_copy = copy.deepcopy(data_copy['data'])
+        # print(str(settings_copy))
+        if type(settings_copy) is dict:
+            settings_copy.pop('file_data', None)
+            m = hashlib.md5()
+            test_hash = m.update(str(SortedDict(settings_copy)).encode('utf-8'))
+            data_copy['settings_hash'] = m.hexdigest()
+        else:
+            data_copy['settings_hash'] = 'AAAA'
+
         serializer = CacheEntrySerializer(data=data_copy)
         if serializer.is_valid():
             entry = None
@@ -91,7 +103,8 @@ class EntryDetail(APIView):
                 entry = Cache_entry.objects.get(
                         md5=serializer.validated_data['md5'],
                         expiry_date__gte=datetime.date.today(),
-                        data__contains=search_components)
+                        data__contains=search_components,
+                        settings_hash=serializer.validated_data['settings_hash'])
             except Exception as e:
                 pass
             if entry is not None:

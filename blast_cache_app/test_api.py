@@ -151,6 +151,7 @@ class CacheEntryTests(APITestCase):
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
                                        data={"-num_iterations": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
@@ -164,12 +165,13 @@ class CacheEntryTests(APITestCase):
 
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
-
+#
     def test_accept_post_with_existing_ids_and_expired_in_db(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
                                        data={"-num_iterations": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
@@ -188,6 +190,7 @@ class CacheEntryTests(APITestCase):
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
                                        data={"-num_iterations": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
@@ -195,6 +198,7 @@ class CacheEntryTests(APITestCase):
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD+50),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
                                        data={"-num_iterations": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
@@ -209,6 +213,15 @@ class CacheEntryTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_reject_two_identical_insertions(self):
+        url = reverse('entryDetail')
+        data = {'name': 'test', 'md5': self.md5, 'file_type': 1,
+                'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME FILE DATA YO"}
+                }
+        response = self.client.post(url, data, format='json')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 # GET TESTS BELOW
 
