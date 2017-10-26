@@ -82,7 +82,7 @@ i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, data=request_data)
-print("Cache Response:", r.status_code, r.text)
+print("Cache Response:", r.status_code)
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
@@ -107,6 +107,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     print("Submission Response:", r.status_code)
 else:
     # get blast file from cache
+    print("Cache Response:", r.status_code, "retrieved file from cache")
     if r.status_code == 200:
         response_data = json.loads(r.text)
         if 'data' in response_data:

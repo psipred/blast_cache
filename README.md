@@ -29,7 +29,7 @@ files.
 2. POST Requests
 * blast_cache/entry : required fields include
 
-When posting PSSM string data it needs to be esacped properly so that it
+When posting PSSM string data it needs to be escaped properly so that it
 does not get read as json on submission (see line 98 of run_blast.py),
 .replace('"', '\\"').replace('\n', '\\n'). This also means that these
 escape sequences must be removed when data is retrieved
