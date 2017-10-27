@@ -66,8 +66,8 @@ class EntryDetail(APIView):
         print("QUERY CREATED HASH FROM REQUEST", settings_hash)
         print("QUERY MD5", md5)
 
-        print('CACHE MD5', Cache_entry.objects.all()[1])
-        print('CACHE SETTINGS HASH', Cache_entry.objects.all()[1].settings_hash)
+        print('CACHE MD5', Cache_entry.objects.all()[0])
+        print('CACHE SETTINGS HASH', Cache_entry.objects.all()[0].settings_hash)
         try:
             entry = Cache_entry.objects.get(
                     md5=md5,
