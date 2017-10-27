@@ -87,6 +87,7 @@ test_hash = m.update(str(SortedDict(request_data)).encode('utf-8'))
 print(m.hexdigest())
 print(request_data)
 r = requests.get(entry_query, data=request_data)
+print(r.url)
 print("Cache Response:", r.status_code)
 exit()
 if r.status_code == 404 and "No Record Available" in r.text:
