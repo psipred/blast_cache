@@ -80,10 +80,10 @@ entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+md5
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
-
+print(request_data)
 r = requests.get(entry_query, data=request_data)
 print("Cache Response:", r.status_code)
-#exit()
+exit()
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
