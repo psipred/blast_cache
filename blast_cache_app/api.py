@@ -58,7 +58,7 @@ class EntryDetail(APIView):
         settings_hash = ''
         if type(request.GET) is QueryDict:
             for k, v in request.GET.items():
-                settings[k] = v[0]
+                settings[k] = v
             settings.pop('file_data', None)
             m = hashlib.md5()
             test_hash = m.update(str(SortedDict(settings)).encode('utf-8'))
