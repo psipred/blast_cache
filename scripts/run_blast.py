@@ -8,6 +8,7 @@ from Bio.Blast import NCBIXML
 import time
 import math
 import json
+from sortedcontainers import SortedDict
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
