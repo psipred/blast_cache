@@ -63,11 +63,11 @@ class EntryDetail(APIView):
             m = hashlib.md5()
             test_hash = m.update(str(SortedDict(settings)).encode('utf-8'))
             settings_hash = m.hexdigest()
-        # print("QUERY CREATED HASH FROM REQUEST", settings_hash)
-        # print("QUERY MD5", md5)
-        #
-        # print('CACHE MD5', Cache_entry.objects.all()[1])
-        # print('CACHE SETTINGS HASH', Cache_entry.objects.all()[1].settings_hash)
+        print("QUERY CREATED HASH FROM REQUEST", settings_hash)
+        print("QUERY MD5", md5)
+
+        print('CACHE MD5', Cache_entry.objects.all()[1])
+        print('CACHE SETTINGS HASH', Cache_entry.objects.all()[1].settings_hash)
         try:
             entry = Cache_entry.objects.get(
                     md5=md5,
