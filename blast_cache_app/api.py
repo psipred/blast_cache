@@ -63,6 +63,7 @@ class EntryDetail(APIView):
             m = hashlib.md5()
             test_hash = m.update(str(SortedDict(settings)).encode('utf-8'))
             settings_hash = m.hexdigest()
+        print("HTTP GET PARAMS", request.GET)
         print("INPUT SETTING", settings)
         print("QUERY CREATED HASH FROM REQUEST", settings_hash)
         print("QUERY MD5", md5)
