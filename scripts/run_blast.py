@@ -80,6 +80,10 @@ entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+md5
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
+
+m = hashlib.md5()
+test_hash = m.update(str(SortedDict(request_data)).encode('utf-8'))
+print(m.hexdigest())
 print(request_data)
 r = requests.get(entry_query, data=request_data)
 print("Cache Response:", r.status_code)
