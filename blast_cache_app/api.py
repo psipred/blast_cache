@@ -5,6 +5,7 @@ import hashlib
 from sortedcontainers import SortedDict
 
 from django.http import Http404
+from django.http import QueryDict
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -53,11 +54,25 @@ class EntryDetail(APIView):
 
     def get(self, request, md5, format=None):
         hstore_key_list = ["file_data", ]
+        settings = {}
+        settings_hash = ''
+        if type(request.GET) is QueryDict:
+            for k, v in request.GET.items():
+                settings[k] = v[0]
+            settings.pop('file_data', None)
+            m = hashlib.md5()
+            test_hash = m.update(str(SortedDict(settings)).encode('utf-8'))
+            settings_hash = m.hexdigest()
+        # print("QUERY CREATED HASH FROM REQUEST", settings_hash)
+        # print("QUERY MD5", md5)
+        #
+        # print('CACHE MD5', Cache_entry.objects.all()[1])
+        # print('CACHE SETTINGS HASH', Cache_entry.objects.all()[1].settings_hash)
         try:
             entry = Cache_entry.objects.get(
                     md5=md5,
                     expiry_date__gte=datetime.date.today(),
-                    data__contains=request.GET,)
+                    settings_hash=settings_hash, )
         except Exception as e:
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
@@ -85,7 +100,6 @@ class EntryDetail(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
         settings_copy = copy.deepcopy(data_copy['data'])
-        # print(str(settings_copy))
         if type(settings_copy) is dict:
             settings_copy.pop('file_data', None)
             m = hashlib.md5()
@@ -103,7 +117,6 @@ class EntryDetail(APIView):
                 entry = Cache_entry.objects.get(
                         md5=serializer.validated_data['md5'],
                         expiry_date__gte=datetime.date.today(),
-                        data__contains=search_components,
                         settings_hash=serializer.validated_data['settings_hash'])
             except Exception as e:
                 pass

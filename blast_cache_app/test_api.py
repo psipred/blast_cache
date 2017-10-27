@@ -166,6 +166,41 @@ class CacheEntryTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 #
+    def test_reject_post_with_existing_id_and_valid_expiry_and_expired_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD+50),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce3 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="5f9e6c8f7c71ac9477c3cbc1a6dd8a51",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        url = reverse('entryDetail')
+        data = {'name': 'test', 'md5': 'ac1a602a913db2ab48fbf5b1a9e1269a',
+                'file_type': 1, 'runtime': '80', "blast_hit_count": "500",
+                "data": {"file_data": "SOME DATA YO",
+                         "-num_iterations": "20",
+                         "-num_descriptions": "500"}
+                }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+
     def test_accept_post_with_existing_ids_and_expired_in_db(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
                                        datetime.timedelta(
@@ -223,14 +258,21 @@ class CacheEntryTests(APITestCase):
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
-# GET TESTS BELOW
+# # GET TESTS BELOW
 
-    def test_get_returns_entry_with_md5(self):
+    def test_get_returns_entry_with_md5_and_settings(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
-                                       days=settings.CACHE_EXPIRY_PERIOD))
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
         response = self.client.get(reverse('entryDetail',
-                                           args=[ce1.md5, ]) + ".json")
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn("-num_iterations", response.content.decode("utf-8"))
@@ -250,14 +292,24 @@ class CacheEntryTests(APITestCase):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
-                                       accessed_count=0)
+                                       accessed_count=0,
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_iterations": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
         response = self.client.get(reverse('entryDetail',
-                                           args=[ce1.md5, ]) + ".json")
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn("\"accessed_count\":1", response.content.decode("utf-8"))
         response = self.client.get(reverse('entryDetail',
-                                           args=[ce1.md5, ]) + ".json")
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
         response.render()
         self.assertEqual(response.status_code, 200)
         self.assertIn("\"accessed_count\":2", response.content.decode("utf-8"))
@@ -287,14 +339,12 @@ class CacheEntryTests(APITestCase):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
-                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
-                                       data={"-num_iterations": 20,
-                                             "-num_descriptions": 500,
-                                             "file_data": self.read_pssm()})
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a")
         ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
                                        data={"-num_cores": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
@@ -363,15 +413,73 @@ class CacheEntryTests(APITestCase):
                                              "file_data": self.read_pssm()})
         ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
                                        datetime.timedelta(
-                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       days=settings.CACHE_EXPIRY_PERIOD+50),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
                                        data={"-num_cores": 20,
                                              "-num_descriptions": 500,
                                              "file_data": self.read_pssm()})
         response = self.client.get(reverse('entryList',
-                                           args=["bc1a602a913db2ab48fbf5b1a9"
-                                                 "e1269a", ]) + ".json")
+                                           args=["ac1a602a913db2ab48fbf5b1a"
+                                                 "9e1269a", ]) + ".json")
         response.render()
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.content.decode("utf-8"),
                          "\"No Records Available\"")
+
+    def test_return_one_if_one_expired_and_one_valid_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD+50),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores"
+                                                             "=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
+        self.assertEqual(response.status_code, 200)
+
+    def test_return_one_if_two_expired_and_one_valid_in_db(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD+100),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD+50),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce3 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       settings_hash="9f8455f91e58f1099ba32f5943d3908e",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores"
+                                                             "=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
+        self.assertEqual(response.status_code, 200)
