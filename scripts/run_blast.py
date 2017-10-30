@@ -8,7 +8,6 @@ from Bio.Blast import NCBIXML
 import time
 import math
 import json
-from sortedcontainers import SortedDict
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -33,7 +32,7 @@ def read_file(path):
         seq += line
     m = hashlib.md5()
     test_hash = m.update(seq.encode('utf-8'))
-    return(m.hexdigest())
+    return({'seq': seq, 'md5': m.hexdigest()})
 
 
 def get_num_alignments(path):
@@ -76,17 +75,15 @@ blast_settings = " ".join(sys.argv[6:])  # get everything else on the
 
 # strings and data structures we need
 seq_name = fasta_file.split("/")[-1].split(".")[0]
-md5 = read_file(fasta_file)
+file_contents = read_file(fasta_file)
 entry_uri = base_uri+"/blast_cache/entry/"
-entry_query = entry_uri+md5
+entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
-m = hashlib.md5()
-test_hash = m.update(str(SortedDict(request_data)).encode('utf-8'))
 r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-exit()
+
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
@@ -102,8 +99,9 @@ if r.status_code == 404 and "No Record Available" in r.text:
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".pssm")
     request_data["file_data"] = pssm_data
-    entry_data = {"name": seq_name, "file_type": 1, "md5": md5,
+    entry_data = {"name": seq_name, "file_type": 1, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
+                  "sequence": file_contents['seq'],
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     # print(entry_data['data'])
