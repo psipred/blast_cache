@@ -2,7 +2,6 @@ import datetime
 import json
 import copy
 import hashlib
-from sortedcontainers import SortedDict
 
 from django.http import Http404
 from django.http import QueryDict
@@ -54,28 +53,13 @@ class EntryDetail(APIView):
 
     def get(self, request, md5, format=None):
         hstore_key_list = ["file_data", ]
-        settings = {}
-        settings_hash = ''
-        if type(request.GET) is QueryDict:
-            for k, v in request.GET.items():
-                settings[k] = v
-            settings.pop('file_data', None)
-            m = hashlib.md5()
-            test_hash = m.update(str(SortedDict(settings)).encode('utf-8'))
-            settings_hash = m.hexdigest()
-        print("HTTP GET PARAMS", request.GET)
-        print("INPUT SETTING", settings)
-        print("QUERY CREATED HASH FROM REQUEST", settings_hash)
-        print("QUERY MD5", md5)
-
-        print('CACHE MD5', Cache_entry.objects.all()[0])
-        print('CACHE SETTINGS HASH', Cache_entry.objects.all()[0].settings_hash)
         try:
             entry = Cache_entry.objects.get(
                     md5=md5,
                     expiry_date__gte=datetime.date.today(),
-                    settings_hash=settings_hash, )
+                    data__contains=request.GET)
         except Exception as e:
+            # print(str(e))
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         serializer = CacheEntrySerializer(entry)
@@ -91,6 +75,7 @@ class EntryDetail(APIView):
         data_copy['runtime'] = request.data['runtime']
         data_copy['blast_hit_count'] = request.data['blast_hit_count']
         data_copy['data'] = request.data['data']
+        data_copy['sequence'] = request.data['sequence']
 
         if type(data_copy['data']) is not dict and \
            type(data_copy['data']) is str:
@@ -101,15 +86,6 @@ class EntryDetail(APIView):
                 return Response("Data malformatted: "+str(e),
                                 status=status.HTTP_400_BAD_REQUEST)
 
-        settings_copy = copy.deepcopy(data_copy['data'])
-        if type(settings_copy) is dict:
-            settings_copy.pop('file_data', None)
-            m = hashlib.md5()
-            test_hash = m.update(str(SortedDict(settings_copy)).encode('utf-8'))
-            data_copy['settings_hash'] = m.hexdigest()
-        else:
-            data_copy['settings_hash'] = 'AAAA'
-
         serializer = CacheEntrySerializer(data=data_copy)
         if serializer.is_valid():
             entry = None
@@ -119,7 +95,7 @@ class EntryDetail(APIView):
                 entry = Cache_entry.objects.get(
                         md5=serializer.validated_data['md5'],
                         expiry_date__gte=datetime.date.today(),
-                        settings_hash=serializer.validated_data['settings_hash'])
+                        data__contains=search_components)
             except Exception as e:
                 pass
             if entry is not None:

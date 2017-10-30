@@ -15,7 +15,7 @@ class CacheEntrySerializer(serializers.ModelSerializer):
         model = Cache_entry
         fields = ('pk', 'name', 'md5', 'accessed_count', 'created',
                   'modified', 'expiry_date', 'file_type', 'blast_hit_count',
-                  'runtime', 'data', 'settings_hash')
+                  'runtime', 'data', 'sequence')
         read_only_fields = ('accessed_count', 'created', 'modified',
                             'expiry_date',)
         extra_kwargs = {
@@ -25,6 +25,7 @@ class CacheEntrySerializer(serializers.ModelSerializer):
             'blast_hit_count': {'required': True},
             'runtime': {'required': True},
             'data': {'required': True},
+            'sequence': {'required': True},
         }
 
     def validate_data(self, data):
@@ -54,7 +55,7 @@ class CacheEntrySerializer(serializers.ModelSerializer):
                 blast_hit_count=validated_data['blast_hit_count'],
                 runtime=validated_data['runtime'],
                 data=validated_data['data'],
-                settings_hash=validated_data['settings_hash'],
+                sequence=validated_data['sequence'],
         )
         entry.save()
         return entry

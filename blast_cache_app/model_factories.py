@@ -52,6 +52,7 @@ class CacheEntryFactory(factory.DjangoModelFactory):
     data = {"-num_iterations": random.randint(1, 6),
             "-num_descriptions": random.randint(1, 5000),
             "file_data": read_file(file_type)}
-    settings_hash = produce_settings_hash(data)
+    sequence = random_string(length=120)
+
     class Meta:
         model = Cache_entry

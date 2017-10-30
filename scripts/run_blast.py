@@ -84,10 +84,7 @@ request_data = dict(zip(i, i))
 
 m = hashlib.md5()
 test_hash = m.update(str(SortedDict(request_data)).encode('utf-8'))
-print(m.hexdigest())
-print(request_data)
 r = requests.get(entry_query, params=request_data)
-print(r.url)
 print("Cache Response:", r.status_code)
 exit()
 if r.status_code == 404 and "No Record Available" in r.text:

@@ -40,9 +40,8 @@ class Cache_entry (TimeStampedModel):
     runtime = models.IntegerField(default=0, null=False, blank=False)
     data = HStoreField(null=True, )  # we store the pssm text data and the
     #                                  commandline options here.
-    settings_hash = models.CharField(max_length=64, unique=False, null=False,
-                                     blank=False, db_index=True)
-    # hash of the settings that were sent
+    sequence = models.CharField(max_length=65536, unique=False, null=False,
+                                blank=False, db_index=True)
 
     def __str__(self):
         return str(self.md5)
