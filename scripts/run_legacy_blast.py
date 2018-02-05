@@ -97,7 +97,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     with open(out_dir+"/"+seq_name+".pn", 'w') as pn:
         pn.write(out_dir+"/"+seq_name+"."+output_type)
     with open(out_dir+"/"+seq_name+".sn", 'w') as sn:
-        sn.write(fasta_file)
+        sn.write(out_dir+"/"+fasta_file)
     mm_cmd = blast_bin+"/makemat -P "+out_dir+"/"+seq_name
     print(mm_cmd)
     start_time = time.time()
