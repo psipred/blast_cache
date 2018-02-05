@@ -108,7 +108,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
-    pssm_data = get_pssm_data(out_dir+"/"+seq_name+"."+output_type)
+    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".mtx")
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
