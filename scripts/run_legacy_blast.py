@@ -69,7 +69,7 @@ out_dir = sys.argv[2]  # path to place blast output and PSSM files
 base_uri = sys.argv[3]  # ip or URI for the server blast_cache is running on
 blast_bin = sys.argv[4]  # path to the blast binary dir
 blast_db = sys.argv[5]  # path to blast db location
-output_type = sys.argv[6]  # file endsing for PSSM file
+output_type = sys.argv[6] # file endsing for PSSM file
 blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
@@ -84,28 +84,33 @@ request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-cmd = ''
+
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
-    if output_type == 'pssm6':
-        cmd = blast_bin+"/psiblast -in_pssm "+fasta_file+" -out "+out_dir+"/" + \
-            seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type+" -db " + \
-            blast_db+" -outfmt 5 "+blast_settings
-    else:
-        cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
-            seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type+" -db " + \
-            blast_db+" -outfmt 5 "+blast_settings
+    cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
+        blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "++blast_settings
     print(cmd)
     start_time = time.time()
     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     p.wait()
+    with open(out_dir+"/"+seq_name+".pn", 'w') as pn:
+        pn.write(out_dir+"/"+seq_name+"."+output_type)
+    with open(out_dir+"/"+seq_name+".sn", 'w') as sn:
+        sn.write(fasta_file)
+    mm_cmd = blast_bin+"/makemat -P "+out_dir+"/"+seq_name
+    print(mm_cmd)
+    start_time = time.time()
+    p = subprocess.Popen(shlex.split(mm_cmd), stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+    p.wait()
+
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+"."+output_type)
     request_data["file_data"] = pssm_data
-    entry_data = {"name": seq_name, "file_type": 1, "md5": file_contents['md5'],
+    entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "sequence": file_contents['seq'],
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
