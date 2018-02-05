@@ -98,7 +98,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
         pn.write(out_dir+"/"+seq_name+"."+output_type)
     with open(out_dir+"/"+seq_name+".sn", 'w') as sn:
         sn.write(out_dir+"/"+fasta_file)
-    mm_cmd = blast_bin+"/makemat -P "+out_dir+"/"+seq_name
+    mm_cmd = blast_bin+"/makemat -P "+seq_name
     print(mm_cmd)
     start_time = time.time()
     p = subprocess.Popen(shlex.split(mm_cmd), stdout=subprocess.PIPE,
