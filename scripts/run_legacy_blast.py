@@ -88,7 +88,7 @@ print("Cache Response:", r.status_code)
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
-        blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "++blast_settings
+        blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "+blast_settings
     print(cmd)
     start_time = time.time()
     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
@@ -116,8 +116,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     # print(entry_data['data'])
-    r = requests.post(entry_uri, data=entry_data)
-    print("Submission Response:", r.status_code)
+    # r = requests.post(entry_uri, data=entry_data)
+    # print("Submission Response:", r.status_code)
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
