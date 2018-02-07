@@ -90,7 +90,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     if output_type == 'pssm6':
         cmd = blast_bin+"/psiblast -in_pssm "+fasta_file+" -out_pssm " + \
               out_dir+"/"+seq_name+"."+output_type+" -db " + \
-              blast_db+blast_settings
+              blast_db+" "+blast_settings
     else:
         cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
             seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type+" -db " + \
