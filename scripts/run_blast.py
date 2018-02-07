@@ -4,6 +4,7 @@ import hashlib
 import subprocess
 import shlex
 import os.path
+import os.chmod
 from Bio.Blast import NCBIXML
 import time
 import math
@@ -104,6 +105,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
                          stderr=subprocess.PIPE)
     p.wait()
     end_time = time.time()
+    os.chmod(out_dir+"/"+seq_name+"."+output_type, 0o666)
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+"."+output_type)
@@ -116,8 +118,6 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   }
     r = requests.post(entry_uri, data=entry_data)
     print("Submission Response:", r.status_code)
-    print(r.text)
-    print(file_contents['seq'])
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
