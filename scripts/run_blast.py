@@ -4,7 +4,7 @@ import hashlib
 import subprocess
 import shlex
 import os.path
-import os.fchmod
+import os
 from Bio.Blast import NCBIXML
 import time
 import math
