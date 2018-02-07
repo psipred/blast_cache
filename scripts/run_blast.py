@@ -64,18 +64,19 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-fasta_file = sys.argv[1]  # path to input fasta
+input_file = sys.argv[1]  # path to input fasta
 out_dir = sys.argv[2]  # path to place blast output and PSSM files
 base_uri = sys.argv[3]  # ip or URI for the server blast_cache is running on
 blast_bin = sys.argv[4]  # path to the blast binary dir
 blast_db = sys.argv[5]  # path to blast db location
 output_type = sys.argv[6]  # file endsing for PSSM file
-blast_settings = " ".join(sys.argv[7:])  # get everything else on the
+fasta_file = sys.argv[7]  # file endsing for PSSM file
+blast_settings = " ".join(sys.argv[8:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
 
 # strings and data structures we need
-seq_name = fasta_file.split("/")[-1].split(".")[0]
+seq_name = input_file.split("/")[-1].split(".")[0]
 file_contents = read_file(fasta_file)
 entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
@@ -89,12 +90,12 @@ cmd = ''
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     if output_type == 'pssm6':
-        cmd = blast_bin+"/psiblast -in_pssm "+fasta_file+" -out " + \
+        cmd = blast_bin+"/psiblast -in_pssm "+input_file+" -out " + \
               out_dir+"/"+seq_name+".xml -out_pssm " + \
               out_dir+"/"+seq_name+"."+output_type+" -db " + \
               blast_db+" -outfmt 5 "+blast_settings
     else:
-        cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
+        cmd = blast_bin+"/psiblast -query "+input_file+" -out "+out_dir+"/" + \
             seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type + \
             " -db "+blast_db+" -outfmt 5 "+blast_settings
     print(cmd)
