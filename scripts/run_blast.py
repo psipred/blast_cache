@@ -125,7 +125,7 @@ else:
             response_data['data']['file_data'] = \
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
-            f = open(seq_name+".pssm", 'w')
+            f = open(seq_name+"."+output_type, 'w')
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm
