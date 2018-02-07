@@ -116,6 +116,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     r = requests.post(entry_uri, data=entry_data)
     print("Submission Response:", r.status_code)
     print(r.text)
+    print(file_contents['seq'])
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
