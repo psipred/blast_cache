@@ -88,13 +88,14 @@ cmd = ''
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     if output_type == 'pssm6':
-        cmd = blast_bin+"/psiblast -in_pssm "+fasta_file+" -out_pssm " + \
+        cmd = blast_bin+"/psiblast -in_pssm "+fasta_file+" -out " + \
+              out_dir+"/"+seq_name+".xml -out_pssm " + \
               out_dir+"/"+seq_name+"."+output_type+" -db " + \
-              blast_db+" "+blast_settings
+              blast_db+" -outfmt 5 "+blast_settings
     else:
         cmd = blast_bin+"/psiblast -query "+fasta_file+" -out "+out_dir+"/" + \
-            seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type+" -db " + \
-            blast_db+" -outfmt 5 "+blast_settings
+            seq_name+".xml -out_pssm "+out_dir+"/"+seq_name+"."+output_type + \
+            " -db "+blast_db+" -outfmt 5 "+blast_settings
     print(cmd)
     start_time = time.time()
     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
@@ -105,7 +106,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+"."+output_type)
     request_data["file_data"] = pssm_data
-    entry_data = {"name": seq_name, "file_type": 1, "md5": file_contents['md5'],
+    entry_data = {"name": seq_name, "file_type": 1,
+                  "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "sequence": file_contents['seq'],
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
@@ -120,11 +122,11 @@ else:
         response_data = json.loads(r.text)
         if 'data' in response_data:
             response_data['data']['file_data'] = \
-            response_data['data']['file_data'].replace('seq-data ncbistdaa "',
-                                                       "seq-data ncbistdaa '")
+             response_data['data']['file_data'].replace('seq-data ncbistdaa "',
+                                                        "seq-data ncbistdaa '")
             response_data['data']['file_data'] = \
-            response_data['data']['file_data'].replace('"H\n',
-                                                       "'H\n")
+                response_data['data']['file_data'].replace('"H\n',
+                                                           "'H\n")
             f = open(seq_name+"."+output_type, 'w')
             # before printing we should really
             # sanity check that data is a
