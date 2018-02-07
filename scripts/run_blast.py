@@ -113,7 +113,6 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   "sequence": file_contents['seq'],
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
-    print(entry_data_uri)
     r = requests.post(entry_uri, data=entry_data)
     print("Submission Response:", r.status_code)
     print(r.text)
