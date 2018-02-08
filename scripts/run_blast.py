@@ -101,9 +101,9 @@ if r.status_code == 404 and "No Record Available" in r.text:
             " -db "+blast_db+" -outfmt 5 "+blast_settings
     print(cmd)
     start_time = time.time()
-    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
-    p.wait()
+    # p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
+    #                      stderr=subprocess.PIPE)
+    # p.wait()
     end_time = time.time()
     os.chmod(out_dir+"/"+seq_name+"."+output_type, 0o666)
     runtime = math.ceil(end_time-start_time)
