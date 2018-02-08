@@ -87,6 +87,7 @@ request_data = dict(zip(i, i))
 r = requests.get(entry_query, params=request_data)
 print("Sending md5: " + file_contents['md5'])
 print("Cache Response:", r.status_code)
+print("Cache Response:", r.text)
 cmd = ''
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
