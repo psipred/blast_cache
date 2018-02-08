@@ -53,18 +53,33 @@ class EntryDetail(APIView):
 
     def get(self, request, md5, format=None):
         hstore_key_list = ["file_data", ]
+        #print(request.GET)
+        key_size = len(request.GET)
         try:
-            entry = Cache_entry.objects.get(
-                    md5=md5,
-                    expiry_date__gte=datetime.date.today(),
-                    data__contains=request.GET)
+            entries = Cache_entry.objects.all().filter(md5=md5)\
+                    .filter(expiry_date__gte=datetime.date.today())\
+                    .filter(data__contains=request.GET)
         except Exception as e:
-            # print(str(e))
+            #print(str(e))
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
-        serializer = CacheEntrySerializer(entry)
-        entry.accessed_count += 1
-        entry.save()
+        if len(entries) == 0:
+            return Response("No Record Available",
+                            status=status.HTTP_404_NOT_FOUND)
+        # print(len(entries))
+        valid_count = 0
+        returning_entry = None
+        for entry in entries:
+            if len(entry.data.keys()) == key_size+1:
+                returning_entry = entry
+                valid_count += 1
+
+        if valid_count > 1:
+            return Response("Can't Unambiguously Resolve Request",
+                            status=status.HTTP_500_INTERNAT_SERVER_ERROR)
+        serializer = CacheEntrySerializer(returning_entry)
+        returning_entry.accessed_count += 1
+        returning_entry.save()
         return Response(serializer.data)
 
     def post(self, request, format=None):

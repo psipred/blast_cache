@@ -428,3 +428,27 @@ class CacheEntryTests(APITestCase):
                                                              "-num_descriptio"
                                                              "ns=500")
         self.assertEqual(response.status_code, 200)
+
+    def test_get_correct_hstore_entry_with_shared_md5(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "-gap_penalty": 20,
+                                             "file_data": self.read_pssm()})
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_cores=20&"
+                                                             "-num_descriptio"
+                                                             "ns=500")
+        response.render()
+        self.assertEqual(response.status_code, 200)
