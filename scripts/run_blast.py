@@ -136,6 +136,7 @@ else:
             # psiblast pssm
             f.write(response_data['data']['file_data']+'\n')
             f.close
+            os.chmod(seq_name+"."+output_type, 0o666)
     else:
         # panic
         eprint("Blast cache request returned nether 404 or 200!!!")
