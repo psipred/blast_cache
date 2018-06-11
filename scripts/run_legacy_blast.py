@@ -69,7 +69,7 @@ out_dir = sys.argv[2]  # path to place blast output and PSSM files
 base_uri = sys.argv[3]  # ip or URI for the server blast_cache is running on
 blast_bin = sys.argv[4]  # path to the blast binary dir
 blast_db = sys.argv[5]  # path to blast db location
-output_type = sys.argv[6] # file endsing for PSSM file
+output_type = sys.argv[6]  # file endsing for PSSM file
 blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
@@ -130,7 +130,7 @@ else:
             response_data['data']['file_data'] = \
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
-            f = open(seq_name+".pssm", 'w')
+            f = open(seq_name+".mtx", 'w')
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm

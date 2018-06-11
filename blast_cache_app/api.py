@@ -53,7 +53,7 @@ class EntryDetail(APIView):
 
     def get(self, request, md5, format=None):
         hstore_key_list = ["file_data", ]
-        #print(request.GET)
+        # print(request.GET)
         key_size = len(request.GET)
         try:
             entries = Cache_entry.objects.all().filter(md5=md5)\
