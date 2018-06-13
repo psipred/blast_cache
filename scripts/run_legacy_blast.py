@@ -108,7 +108,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
-    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".mtx")
+    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
@@ -130,7 +130,7 @@ else:
             response_data['data']['file_data'] = \
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
-            f = open(seq_name+".mtx", 'w')
+            f = open(seq_name+".lmtx", 'w')
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm
