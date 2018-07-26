@@ -45,6 +45,7 @@ def get_num_alignments(path):
             if len(record.alignments) > hit_count:
                 hit_count = len(record.alignments)
     else:
+        eprint("Couldn't get Alignment number")
         exit(1)
 
     return(hit_count)
@@ -56,6 +57,7 @@ def get_pssm_data(path):
         with open(path) as myfile:
             pssm_data = myfile.read()
     else:
+        eprint("Couldn't get PSSM data")
         exit(1)  # panic
 
     return(pssm_data)
