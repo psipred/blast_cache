@@ -8,6 +8,7 @@ from Bio.Blast import NCBIXML
 import time
 import math
 import json
+import shutil
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -110,6 +111,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
 
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
+    shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
     request_data["file_data"] = pssm_data
