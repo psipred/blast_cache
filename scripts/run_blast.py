@@ -53,7 +53,6 @@ def get_num_alignments(path):
 
 def get_pssm_data(path):
     pssm_data = ""
-    print(path)
     if os.path.isfile(path):
         with open(path) as myfile:
             pssm_data = myfile.read()
