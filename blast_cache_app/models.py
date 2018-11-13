@@ -22,10 +22,10 @@ class TimeStampedModel(models.Model):
 
 class Cache_entry (TimeStampedModel):
     PSSM = 1
-    CHK = 2
+    MTX = 2
     FILE_CHOICES = (
         (PSSM, "pssm"),
-        (CHK, "chk"),
+        (MTX, "mtx"),
     )
     name = models.CharField(max_length=128, unique=False, null=False,
                             blank=False, db_index=True)
@@ -35,7 +35,7 @@ class Cache_entry (TimeStampedModel):
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
     expiry_date = models.DateField(auto_now_add=False)  # set on save
     file_type = models.IntegerField(null=False, blank=False,
-                                    choices=FILE_CHOICES, default=CHK)
+                                    choices=FILE_CHOICES, default=MTX)
     blast_hit_count = models.IntegerField(default=0, null=False, blank=False)
     runtime = models.IntegerField(default=0, null=False, blank=False)
     data = HStoreField(null=True, )  # we store the pssm text data and the
