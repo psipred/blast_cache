@@ -91,8 +91,13 @@ print("Cache Response:", r.status_code)
 
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
-    cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
-        blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "+blast_settings
+    cmd = ''
+    if output_type == "chk6":
+        cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
+            blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml -R "+out_dir+"/"+seq_name+".mtx "+blast_settings
+    else:
+        cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
+            blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "+blast_settings
     print(cmd)
     start_time = time.time()
     p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE,
@@ -113,10 +118,6 @@ if r.status_code == 404 and "No Record Available" in r.text:
     runtime = math.ceil(end_time-start_time)
     try:
         shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
-    except Exception as e:
-        pass
-    try:
-        shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".mtx6")
     except Exception as e:
         pass
 
