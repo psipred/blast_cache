@@ -178,7 +178,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     os.system(sn_cmd)
     try:
         shutil.copy(fasta_file, out_dir)
-    except as e:
+    except Exception as e:
         pass
     print("Running blast")
     print(pn_cmd)
