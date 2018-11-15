@@ -111,7 +111,15 @@ if r.status_code == 404 and "No Record Available" in r.text:
 
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
-    shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
+    try:
+        shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
+    except Exception as e:
+        pass
+    try:
+        shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".mtx6")
+    except Exception as e:
+        pass
+
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
     request_data["file_data"] = pssm_data
