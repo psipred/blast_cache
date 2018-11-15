@@ -177,6 +177,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     print(pn_cmd)
     print(sn_cmd)
     print(makemat_cmd)
+    os.chdir(out_dir)
     p = subprocess.Popen(shlex.split(makemat_cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     p.communicate()
