@@ -117,7 +117,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
     try:
-        shutil.move(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
+        shutil.copy(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
     except Exception as e:
         pass
 
