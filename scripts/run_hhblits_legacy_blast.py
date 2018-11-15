@@ -3,7 +3,7 @@ import sys
 import hashlib
 import subprocess
 import shlex
-from shutil import copyfile
+import shutil
 import os.path
 import os
 from Bio.Blast import NCBIXML
@@ -174,7 +174,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     makemat_cmd = blast_bin+"makemat -P "+out_dir+"/"+seq_name
     os.system(pn_cmd)
     os.system(sn_cmd)
-    copyfile(fasta_file, out_dir)
+    shutil.copy(fasta_file, out_dir)
     print("Running blast")
     print(pn_cmd)
     print(sn_cmd)
