@@ -169,7 +169,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
                          stderr=subprocess.PIPE)
     p.communicate()
 
-    pn_cmd = "echo "+seq_name+"."+output_type+" > "+out_dir+"/"+seq_name+".pn"
+    pn_cmd = "echo "+seq_name+".chk > "+out_dir+"/"+seq_name+".pn"
     sn_cmd = "echo "+seq_name+".fasta > "+out_dir+"/"+seq_name+".sn"
     makemat_cmd = blast_bin+"makemat -P "+out_dir+"/"+seq_name
     os.system(pn_cmd)
@@ -189,7 +189,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     # exit()
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
-    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".chk")
+    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".mtx")
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 2,
                   "md5": file_contents['md5'],
