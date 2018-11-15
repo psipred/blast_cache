@@ -3,6 +3,7 @@ import sys
 import hashlib
 import subprocess
 import shlex
+from shutil import copyfile
 import os.path
 import os
 from Bio.Blast import NCBIXML
@@ -173,6 +174,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     makemat_cmd = blast_bin+"makemat -P "+out_dir+"/"+seq_name
     os.system(pn_cmd)
     os.system(sn_cmd)
+    copyfile(fasta_file, out_dir)
     print("Running blast")
     print(pn_cmd)
     print(sn_cmd)
@@ -187,7 +189,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     # exit()
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
-    pssm_data = get_pssm_data(out_dir+"/"+seq_name+"."+output_type)
+    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".chk")
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 2,
                   "md5": file_contents['md5'],
