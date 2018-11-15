@@ -94,7 +94,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     cmd = ''
     if output_type == "chk6":
         cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
-            blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml -R "+out_dir+"/"+seq_name+".mtx "+blast_settings
+            blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml -R "+out_dir+"/"+seq_name+".chk "+blast_settings
     else:
         cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
             blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "+blast_settings
