@@ -26,6 +26,8 @@ import re
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/Applications/blast-2.2.26/bin/ mtx /opt/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
 
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 -a 12 -b 0 -j 2 -h 0.01
+
 def read_file(path):
     seq = ''
     with open(path, 'r') as myfile:
@@ -174,7 +176,10 @@ if r.status_code == 404 and "No Record Available" in r.text:
     makemat_cmd = blast_bin+"makemat -P "+out_dir+"/"+seq_name
     os.system(pn_cmd)
     os.system(sn_cmd)
-    shutil.copy(fasta_file, out_dir)
+    try:
+        shutil.copy(fasta_file, out_dir)
+    except as e:
+        pass
     print("Running blast")
     print(pn_cmd)
     print(sn_cmd)
