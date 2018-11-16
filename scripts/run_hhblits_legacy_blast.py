@@ -26,7 +26,7 @@ import re
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/Applications/blast-2.2.26/bin/ mtx /opt/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 NULL -a 12 -b 0 -j 2 -h 0.01
-# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx6 /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 ./files/P04691.a3m -a 12 -b 0 -j 2 -h 0.01 -F T
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx6 /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 ./files/P04691.a3m -a 12 -b 0 -j 2 -h 0.01 -F F
 
 
 def read_file(path):
@@ -123,7 +123,7 @@ reformat_cmd = ''
 formatdb_cmd = ''
 blast_cmd = ''
 output_ending = ".a3m"
-iterations = "2"
+iterations = "3"
 if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
