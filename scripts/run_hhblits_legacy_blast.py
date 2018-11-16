@@ -127,6 +127,7 @@ iterations = "3"
 if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
+
 if r.status_code == 404 and "No Record Available" in r.text:
 
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
