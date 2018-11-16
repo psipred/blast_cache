@@ -25,8 +25,9 @@ import re
 # USEAGE
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/Applications/blast-2.2.26/bin/ mtx /opt/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 NULL -a 12 -b 0 -j 2 -h 0.01
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx6 /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 ./files/P04.a3m -a 12 -b 0 -j 2 -h 0.01
 
-# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 -a 12 -b 0 -j 2 -h 0.01
 
 def read_file(path):
     seq = ''
@@ -98,7 +99,8 @@ blast_bin = sys.argv[4]  # path to the blast binary dir
 output_type = sys.argv[5]  # file endsing for PSSM file
 hhblits_root = sys.argv[6]  # location of the hhblist bin
 hhblits_db = sys.argv[7]  # location of the hhblist_db
-blast_settings = " ".join(sys.argv[8:])  # get everything else on the
+a3m_alignment = sys.argv[8]
+blast_settings = " ".join(sys.argv[9:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
 
@@ -120,33 +122,37 @@ hhblits_cmd = ''
 reformat_cmd = ''
 formatdb_cmd = ''
 blast_cmd = ''
+output_ending = ".a3m"
+if output_type == 'mtx6':
+    output_ending = ".a3m6"
 if r.status_code == 404 and "No Record Available" in r.text:
 
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   fasta_file+" -oa3m " + \
-                  out_dir+"/"+seq_name+".a3m -e 0.001 -n 3 -cpu 2 " + \
+                  out_dir+"/"+seq_name+output_ending + \
+                  " -e 0.001 -n 3 -cpu 2 " + \
                   "-diff inf -cov 10 -Z 100000 -B 100000 -maxfilt 100000 " + \
                   "-maxmem 5"
     reformat_cmd = hhblits_root+"/scripts/reformat.pl a3m psi " + \
-        out_dir+"/"+seq_name+".a3m "+out_dir+"/"+seq_name+".psi"
-    formatdb_cmd = blast_bin+"/formatdb -i "+out_dir+"/"+seq_name+".a3m " + \
-        "-t "+out_dir+"/"+seq_name+".a3m"
+        out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
+    formatdb_cmd = blast_bin+"/formatdb -i " + \
+        out_dir+"/"+seq_name+output_ending+" " + \
+        "-t "+out_dir+"/"+seq_name+output_ending
+    blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/" + \
+        seq_name+outpur_ending+" -i " + \
+        fasta_file+" -B "+out_dir+"/"+seq_name+".psi -C " + \
+        out_dir+"/"+seq_name+".chk -a 2 -m 7 -o " + \
+        out_dir+"/"+seq_name+".xml " + blast_settings
 
     if output_type == 'mtx6':  # if this ending then we are restarting from an earlier mtx
-        # blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/"+seq_name+".a3m -i " + \
-        #     fasta_file+" -B "+out_dir+"/"+seq_name+".psi -C " + \
-        #     out_dir+"/"+seq_name+".chk6 -a 2 -m 7 -o " + \
-        #     out_dir+"/"+seq_name+".xml " + blast_settings
-        pass
-        # need someway to restart hhblits for pgenthreader
-    else:
-        blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/"+seq_name+".a3m -i " + \
-            fasta_file+" -B "+out_dir+"/"+seq_name+".psi -C "+ \
-            out_dir+"/"+seq_name+".chk -a 2 -m 7 -o " + \
-            out_dir+"/"+seq_name+".xml " + blast_settings
+        hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
+                  a3m_alignment+" -oa3m " + \
+                  out_dir+"/"+seq_name+output_ending + \
+                  " -e 0.001 -n 3 -cpu 2 " + \
+                  "-diff inf -cov 10 -Z 100000 -B 100000 -maxfilt 100000 " + \
+                  "-maxmem 5"
 
     start_time = time.time()
-
     print("Running hhblits")
     print(hhblist_cmd)
     p = subprocess.Popen(shlex.split(hhblist_cmd), stdout=subprocess.PIPE,
