@@ -123,7 +123,7 @@ reformat_cmd = ''
 formatdb_cmd = ''
 blast_cmd = ''
 output_ending = ".a3m"
-iterations = 3
+iterations = 2
 if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = 1
