@@ -126,8 +126,9 @@ output_ending = ".a3m"
 iterations = "3"
 if output_type == 'mtx6':
     output_ending = ".a3m6"
+
+if output_type == 'mtx6':
     iterations = "1"
-    print("Hey")
 
 if r.status_code == 404 and "No Record Available" in r.text:
 
