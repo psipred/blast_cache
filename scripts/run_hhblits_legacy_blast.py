@@ -126,11 +126,7 @@ output_ending = ".a3m"
 iterations = "3"
 if output_type == 'mtx6':
     output_ending = ".a3m6"
-
-print(iterations)
-if output_type == 'mtx6':
     iterations = "1"
-print(iterations)
 
 if r.status_code == 404 and "No Record Available" in r.text:
 
@@ -155,7 +151,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
         hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   a3m_alignment+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
-                  " -e 0.001 -n 3 -cpu 2 " + \
+                  " -e 0.001 -n "+iterations+" -cpu 2 " + \
                   "-diff inf -cov 10 -Z 100000 -B 100000 -maxfilt 100000 " + \
                   "-maxmem 5"
 
