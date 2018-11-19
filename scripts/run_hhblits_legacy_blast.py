@@ -235,7 +235,8 @@ else:
             f.write(response_data['data']['file_data']+'\n')
             f.close
             os.chmod(seq_name+"."+output_type, 0o666)
-            dummy_cmd = "touch "+seq_name+".a3m"
+
+            dummy_cmd = "touch "+seq_name+output_ending
             os.system(dummy_cmd)
 
     else:
