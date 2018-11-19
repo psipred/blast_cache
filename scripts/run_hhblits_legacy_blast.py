@@ -235,6 +235,9 @@ else:
             f.write(response_data['data']['file_data']+'\n')
             f.close
             os.chmod(seq_name+"."+output_type, 0o666)
+            dummy_cmd = "touch "+seq_name+".a3m"
+            os.system(dummy_cmd)
+
     else:
         # panic
         eprint("Blast cache request returned nether 404 or 200!!!")
