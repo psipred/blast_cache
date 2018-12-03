@@ -45,8 +45,11 @@ def read_file(path):
         test_hash = m.update(seqs[0].encode('utf-8'))
         return({'seq': seqs[0], 'md5': m.hexdigest(), 'single': None})
     else:
-        test_hash = m.update(seqs[1].encode('utf-8'))
-        return({'seq': seqs[1], 'md5': m.hexdigest(), 'single': seqs[1]})
+        all_seqs = ''
+        for seq in seqs:
+            all_seqs += seqs[seq]
+        test_hash = m.update(all_seqs.encode('utf-8'))
+        return({'seq': all_seqs, 'md5': m.hexdigest(), 'single': seqs[1]})
 
 
 def get_num_alignments(path):
