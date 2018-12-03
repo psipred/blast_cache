@@ -122,6 +122,7 @@ if file_contents['single']:
     single_out = open(out_dir+"/"+seq_name+".sing", 'w')
     single_out.write(">single\n")
     single_out.write(file_contents['single'])
+    single_out.close()
     blast_input = out_dir+"/"+seq_name+".sing"
     sn_name = seq_name+".sing"
 
