@@ -119,7 +119,7 @@ file_contents = read_file(fasta_file)
 blast_input = fasta_file
 if file_contents['single']:
     single_out = open(out_dir+"/"+seq_name+".sing", 'w')
-    single_out.write(">single")
+    single_out.write(">single\n")
     single_out.write(file_contents['single'])
     blast_input = out_dir+"/"+seq_name+".sing"
 
