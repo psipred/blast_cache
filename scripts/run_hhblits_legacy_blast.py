@@ -196,7 +196,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
     print(blast_cmd)
     p = subprocess.Popen(shlex.split(blast_cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    p.communicate()
+    res = p.communicate()
+    print("stderr =", res[1])
 
     pn_cmd = "echo "+seq_name+".chk > "+out_dir+"/"+seq_name+".pn"
     sn_cmd = "echo "+sn_name+" > "+out_dir+"/"+seq_name+".sn"
@@ -214,7 +215,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
     os.chdir(out_dir)
     p = subprocess.Popen(shlex.split(makemat_cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    p.communicate()
+    res = p.communicate()
+    print("stderr =", res[1])
 
     end_time = time.time()
     if output_type == 'mtx6':
