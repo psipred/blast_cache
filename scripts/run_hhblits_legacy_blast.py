@@ -36,7 +36,7 @@ def read_file(path):
     seqs = {}
     for line in data.split("\n"):
         if line.startswith(">"):
-            seq_count++
+            seq_count += 1
             seqs[seq_count] = ''
         else:
             seqs[seq_count] += line.rstrip()
