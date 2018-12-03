@@ -117,11 +117,13 @@ blast_settings = " ".join(sys.argv[9:])  # get everything else on the
 seq_name = fasta_file.split("/")[-1].split(".")[0]
 file_contents = read_file(fasta_file)
 blast_input = fasta_file
+sn_name = seq_name+".fasta"
 if file_contents['single']:
     single_out = open(out_dir+"/"+seq_name+".sing", 'w')
     single_out.write(">single\n")
     single_out.write(file_contents['single'])
     blast_input = out_dir+"/"+seq_name+".sing"
+    sn_name = seq_name+".sing"
 
 entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
@@ -197,7 +199,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     p.communicate()
 
     pn_cmd = "echo "+seq_name+".chk > "+out_dir+"/"+seq_name+".pn"
-    sn_cmd = "echo "+seq_name+".fasta > "+out_dir+"/"+seq_name+".sn"
+    sn_cmd = "echo "+sn_name+" > "+out_dir+"/"+seq_name+".sn"
     makemat_cmd = blast_bin+"makemat -P "+out_dir+"/"+seq_name
     os.system(pn_cmd)
     os.system(sn_cmd)
