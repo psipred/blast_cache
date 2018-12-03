@@ -33,7 +33,7 @@ def read_file(path):
     with open(path, 'r') as myfile:
         data = myfile.read()
     seq_count = 0
-    seqs = {}
+    seqs = {0: ''}
     for line in data.split("\n"):
         if line.startswith(">"):
             seq_count += 1
