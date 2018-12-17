@@ -180,8 +180,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
         "-t "+out_dir+"/"+seq_name+".flat"
     blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/" + \
         seq_name+".flat -i "+blast_input + \
-        #" -B "+out_dir+"/"+seq_name+".psi -C " + \
-        " -C " + \
+        " -C " + \ #" -B "+out_dir+"/"+seq_name+".psi -C " + \
         out_dir+"/"+seq_name+".chk -a 2 "+blast_settings+" -m 7 -o " + \
         out_dir+"/"+seq_name+".xml "
 
