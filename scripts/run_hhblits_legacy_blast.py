@@ -111,7 +111,7 @@ def make_flat_fasta_db(file, path):
                     output_line = line.upper()
                     output_line = output_line.replace('-', '')
                     output_line = ''.join([i for i in output_line if i in aminoacids])
-                    flat_file.write(output_line)
+                    flat_file.write(output_line+"\n")
     flat_file.close()
 
 
