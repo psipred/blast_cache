@@ -99,8 +99,10 @@ def run_exe(args, name):
 
 def make_flat_fasta_db(file, path):
     # read in a3m, output to temp file with no - or lowercase in seq
-    flat_file = open(path+".flat",'w')
-    if os.path.isfile(file) :
+    aminoacids = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N',
+                  'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X']
+    flat_file = open(path+".flat", 'w')
+    if os.path.isfile(file):
         with open(file, 'r') as a3mfile:
             for line in a3mfile:
                 if line.startswith('>'):
@@ -108,6 +110,7 @@ def make_flat_fasta_db(file, path):
                 else:
                     output_line = line.upper()
                     output_line = output_line.replace('-', '')
+                    output_line = ''.join([i for i in output_line if i in aminoacids])
                     flat_file.write(output_line)
     flat_file.close()
 
