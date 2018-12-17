@@ -163,8 +163,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
     blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/" + \
         seq_name+output_ending+" -i " + \
         blast_input+" -B "+out_dir+"/"+seq_name+".psi -C " + \
-        out_dir+"/"+seq_name+".chk -a 2 -m 7 -o " + \
-        out_dir+"/"+seq_name+".xml " + blast_settings
+        out_dir+"/"+seq_name+".chk -a 2 "+blast_settings+" -m 7 -o " + \
+        out_dir+"/"+seq_name+".xml "
 
     if output_type == 'mtx6':  # if this ending then we are restarting from an earlier mtx
         hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
