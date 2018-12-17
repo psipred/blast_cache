@@ -97,6 +97,21 @@ def run_exe(args, name):
         sys.exit(code)
 
 
+def make_flat_fasta_db(file, path):
+    # read in a3m, output to temp file with no - or lowercase in seq
+    flat_file = open(path+".flat")
+    if my_file.is_file(file):
+        with open(file, 'r') as a3mfile:
+            for line in a3mfile:
+                if line.startswith('>'):
+                    flat_file.write(line)
+                else:
+                    output_line = line.upper()
+                    output_line = output_line.replace('-', '')
+                    flat_file.write(output_line)
+    flat_file.close()
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
@@ -158,10 +173,10 @@ if r.status_code == 404 and "No Record Available" in r.text:
     reformat_cmd = hhblits_root+"/scripts/reformat.pl a3m psi " + \
         out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
     formatdb_cmd = blast_bin+"/formatdb -i " + \
-        out_dir+"/"+seq_name+output_ending+" " + \
-        "-t "+out_dir+"/"+seq_name+output_ending
+        out_dir+"/"+seq_name+".flat " + \
+        "-t "+out_dir+"/"+seq_name+".flat"
     blast_cmd = blast_bin+"blastpgp -d "+out_dir+"/" + \
-        seq_name+output_ending+" -i " + \
+        seq_name+".flat -i " + \
         blast_input+" -B "+out_dir+"/"+seq_name+".psi -C " + \
         out_dir+"/"+seq_name+".chk -a 2 "+blast_settings+" -m 7 -o " + \
         out_dir+"/"+seq_name+".xml "
@@ -187,6 +202,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
     p = subprocess.Popen(shlex.split(reformat_cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     p.communicate()
+
+    make_flat_fasta_db(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
 
     print("Running formatdb")
     print(formatdb_cmd)
