@@ -100,7 +100,7 @@ def run_exe(args, name):
 def make_flat_fasta_db(file, path):
     # read in a3m, output to temp file with no - or lowercase in seq
     flat_file = open(path+".flat",'w')
-    if my_file.is_file(file):
+    if os.path.isfile(file) :
         with open(file, 'r') as a3mfile:
             for line in a3mfile:
                 if line.startswith('>'):
