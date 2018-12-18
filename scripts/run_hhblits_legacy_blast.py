@@ -115,6 +115,25 @@ def make_flat_fasta_db(file, path):
     flat_file.close()
 
 
+def set_hh_evalue(seq_details):
+    seq_len = 0
+    if file_contents['single']:
+        seq_len = len(file_contents['single'])
+    else:
+        seq_len = len(file_contents['seq'])
+
+    if seq_len <= 500:
+        return('0.001')
+    if seq_len > 500 and seq_len <= 750:
+        return('0.0001')
+    if seq_len > 750 and seq_len <= 1000:
+        return('0.00001')
+    if seq_len > 1000 and seq_len <= 1250:
+        return('0.000001')
+    if seq_len > 1250:
+        return('0.00000001')
+
+
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
@@ -161,6 +180,7 @@ formatdb_cmd = ''
 blast_cmd = ''
 output_ending = ".a3m"
 iterations = "3"
+hh_e_value = set_hh_settings(file_contents)
 if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
@@ -170,9 +190,9 @@ if r.status_code == 404 and "No Record Available" in r.text:
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   fasta_file+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
-                  " -e 0.001 -n "+iterations+" -cpu 2 " + \
-                  "-diff inf -cov 10 -Z 100000 -B 100000 -maxfilt 100000 " + \
-                  "-maxmem 5"
+                  " -e "+hh_e_value+" -n "+iterations+" -cpu 2 " + \
+                  "-diff inf -cov 10 -Z 10000 -B 10000 -maxfilt 10000 " + \
+                  "-maxmem 5 -norealign"
     reformat_cmd = hhblits_root+"/scripts/reformat.pl a3m psi " + \
         out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
     formatdb_cmd = blast_bin+"/formatdb -i " + \
@@ -188,9 +208,9 @@ if r.status_code == 404 and "No Record Available" in r.text:
         hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   a3m_alignment+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
-                  " -e 0.001 -n "+iterations+" -cpu 2 " + \
-                  "-diff inf -cov 10 -Z 100000 -B 100000 -maxfilt 100000 " + \
-                  "-maxmem 5"
+                  " -e "+hh_e_value+" -n "+iterations+" -cpu 2 " + \
+                  "-diff inf -cov 10 -Z 10000 -B 10000 -maxfilt 10000 " + \
+                  "-maxmem 5 -norealign"
 
     start_time = time.time()
     print("Running hhblits")
