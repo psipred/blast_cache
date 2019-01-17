@@ -46,7 +46,7 @@ class CacheEntryFactory(factory.DjangoModelFactory):
     accessed_count = random.randint(0, 100)
     expiry_date = factory.fuzzy.FuzzyDateTime(
                   datetime.datetime(2008, 1, 1, tzinfo=pytz.utc))
-    file_type = random.randint(1, 2)
+    file_type = random.randint(1, 1)
     blast_hit_count = random.randint(0, 5000)
     runtime = random.randint(0, 600)
     data = {"-num_iterations": random.randint(1, 6),

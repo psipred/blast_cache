@@ -156,7 +156,7 @@ class CacheEntryTests(APITestCase):
         data['md5'] = 'ac1a602a913db2ab48fbf5b1a9e1269a'
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
-#
+
     def test_reject_post_with_existing_id_and_valid_expiry_and_expired_in_db(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
                                        datetime.timedelta(
@@ -226,6 +226,17 @@ class CacheEntryTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
 # GET TESTS BELOW
+
+    def test_404_if_query_has_overlapping_but_not_same_number_of_params(self):
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today(),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data=self.insert_settings())
+        response = self.client.get(reverse('entryDetail',
+                                           args=[ce1.md5, ])+".json?"
+                                                             "-num_iterations=20"
+                                                             )
+        response.render()
+        self.assertEqual(response.status_code, 404)
 
     def test_get_returns_entry_with_md5_and_settings(self):
         ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
