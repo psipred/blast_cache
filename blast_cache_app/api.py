@@ -79,6 +79,9 @@ class EntryDetail(APIView):
         if valid_count > 1:
             return Response("Can't Unambiguously Resolve Request",
                             status=status.HTTP_500_INTERNAT_SERVER_ERROR)
+        if valid_count == 0:
+            return Response("No Record Available",
+                            status=status.HTTP_404_NOT_FOUND)
         serializer = CacheEntrySerializer(returning_entry)
         returning_entry.accessed_count += 1
         returning_entry.save()
