@@ -55,6 +55,7 @@ class EntryDetail(APIView):
         hstore_key_list = ["file_data", ]
         # print(request.GET)
         key_size = len(request.GET)
+        print("key size", key_size)
         try:
             entries = Cache_entry.objects.all().filter(md5=md5)\
                     .filter(expiry_date__gte=datetime.date.today())\
@@ -70,6 +71,7 @@ class EntryDetail(APIView):
         valid_count = 0
         returning_entry = None
         for entry in entries:
+            print("entry key size", len(entry.data.keys()))
             if len(entry.data.keys()) == key_size+1:
                 returning_entry = entry
                 valid_count += 1
