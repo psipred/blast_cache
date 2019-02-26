@@ -202,7 +202,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
         seq_name+".flat -i "+blast_input + \
         " -C " + \
         out_dir+"/"+seq_name+".chk "+blast_settings+" -m 7 -o " + \
-        out_dir+"/"+seq_name+".xml "
+        out_dir+"/"+seq_name+".xml -B "+out_dir+"/"+seq_name+".psi"
 #  " -B "+out_dir+"/"+seq_name+".psi -C " + \
     if output_type == 'mtx6':  # if this ending then we are restarting from an earlier mtx
         hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
