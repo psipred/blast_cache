@@ -119,7 +119,7 @@ def make_flat_fasta_db(file, path):
 def remove_bad_blast_chars(a3m, path):
     # read in a3m, output to temp file with no - or lowercase in seq
     aminoacids = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M',
-                  'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'Z']
+                  'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'Z', '-']
     tmp_file = open(path+".a3mtmp", 'w')
     if os.path.isfile(a3m):
         with open(a3m, 'r') as a3mfile:
