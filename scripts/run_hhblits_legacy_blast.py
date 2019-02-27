@@ -118,8 +118,8 @@ def make_flat_fasta_db(file, path):
 
 def remove_bad_blast_chars(psi, path):
     # read in a3m, output to temp file with no - or lowercase in seq
-    aminoacids = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M',
-                  'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'Z', '-']
+    # aminoacids = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M',
+    #               'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'Z', '-']
     tmp_file = open(path+".psitmp", 'w')
     if os.path.isfile(psi):
         with open(psi, 'r') as psifile:
@@ -131,7 +131,7 @@ def remove_bad_blast_chars(psi, path):
                     start = output_line[:33]
                     output_line = start+output_line[33:].replace('B', 'X')
                     output_line = start+output_line[33:].replace('Z', 'X')
-                    output_line = ''.join([i for i in output_line if i in aminoacids])
+                    #output_line = ''.join([i for i in output_line if i in aminoacids])
                     tmp_file.write(output_line+"\n")
     tmp_file.close()
     shutil.copy(path+".psitmp", psi)
