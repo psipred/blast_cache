@@ -110,9 +110,30 @@ def make_flat_fasta_db(file, path):
                 else:
                     output_line = line.upper()
                     output_line = output_line.replace('-', '')
+                    output_line = output_line.replace('B', 'X')
+                    output_line = output_line.replace('Z', 'X')
                     output_line = ''.join([i for i in output_line if i in aminoacids])
                     flat_file.write(output_line+"\n")
     flat_file.close()
+
+def remove_bad_blast_chars(a3m, path):
+    # read in a3m, output to temp file with no - or lowercase in seq
+    aminoacids = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M',
+                  'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'Z']
+    flat_file = open(path+".a3mtmp", 'w')
+    if os.path.isfile(file):
+        with open(file, 'r') as a3mfile:
+            for line in a3mfile:
+                if line.startswith('>'):
+                    flat_file.write(line)
+                else:
+                    output_line = line.upper()
+                    output_line = output_line.replace('B', 'X')
+                    output_line = output_line.replace('Z', 'X')
+                    output_line = ''.join([i for i in output_line if i in aminoacids])
+                    flat_file.write(output_line+"\n")
+    flat_file.close()
+    shutil.copy(path+".a3mtmp", a3m)
 
 
 def set_hh_evalue(seq_details):
@@ -219,6 +240,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
                          stderr=subprocess.PIPE)
     p.communicate()
     os.remove(out_dir+"/"+seq_name+".hhr")
+
+    remove_bad_blast_chars(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
 
     print("Running reformat")
     print(reformat_cmd)
