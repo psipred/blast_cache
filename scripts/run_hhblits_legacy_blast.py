@@ -128,8 +128,9 @@ def remove_bad_blast_chars(a3m, path):
                     tmp_file.write(line)
                 else:
                     output_line = line.upper()
-                    output_line = output_line.replace('B', 'X')
-                    output_line = output_line.replace('Z', 'X')
+                    start = output_line[:33]
+                    output_line = start+output_line[33:].replace('B', 'X')
+                    output_line = start+output_line[33:].replace('Z', 'X')
                     output_line = ''.join([i for i in output_line if i in aminoacids])
                     tmp_file.write(output_line+"\n")
     tmp_file.close()
@@ -241,8 +242,6 @@ if r.status_code == 404 and "No Record Available" in r.text:
     p.communicate()
     os.remove(out_dir+"/"+seq_name+".hhr")
 
-    remove_bad_blast_chars(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
-
     print("Running reformat")
     print(reformat_cmd)
     p = subprocess.Popen(shlex.split(reformat_cmd), stdout=subprocess.PIPE,
@@ -250,6 +249,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     p.communicate()
 
     make_flat_fasta_db(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
+    remove_bad_blast_chars(out_dir+"/"+seq_name+".psi", out_dir+"/"+seq_name)
 
     print("Running formatdb")
     print(formatdb_cmd)
