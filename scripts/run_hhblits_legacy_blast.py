@@ -215,7 +215,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   " -e "+hh_e_value+" -n "+iterations+" -cpu 2 " + \
                   "-diff inf -cov 10 -Z 10000 -B 10000 -maxfilt 10000 " + \
                   "-maxmem 5 -norealign"
-    reformat_cmd = hhblits_root+"/scripts/reformat.pl a3m psi " + \
+    reformat_cmd = hhblits_root+"/scripts/reformat.pl -v 1 -r -noss a3m psi " + \
         out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
     formatdb_cmd = blast_bin+"/formatdb -i " + \
         out_dir+"/"+seq_name+".flat " + \
@@ -250,8 +250,8 @@ if r.status_code == 404 and "No Record Available" in r.text:
 
     print("Flattening a3m file for formatdb")
     make_flat_fasta_db(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
-    print("Remove Bad Chars from psi")
-    remove_bad_blast_chars(out_dir+"/"+seq_name+".psi", out_dir+"/"+seq_name)
+    # print("Remove Bad Chars from psi")
+    # remove_bad_blast_chars(out_dir+"/"+seq_name+".psi", out_dir+"/"+seq_name)
 
     print("Running formatdb")
     print(formatdb_cmd)
