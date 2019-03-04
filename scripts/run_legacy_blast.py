@@ -87,10 +87,9 @@ if seq_count == 1:
     with open(single_file, 'w') as sing:
         sing.write(file_contents)
 else:
-    fasta_lines = fasta_contents.split()
     with open(single_file, 'w') as sing:
         seq_count = 0
-        for line in fasta_lines:
+        for line in fasta_contents:
             if line.startswith(">"):
                 seq_count += 1
             if seq_count == 1:
