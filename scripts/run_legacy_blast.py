@@ -80,7 +80,7 @@ blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 seq_name = fasta_file.split("/")[-1].split(".")[0]
 single_file = out_dir+"/"+seq_name+".sing"
 fasta_contents = []
-with open(fname) as f:
+with open(fasta_file) as f:
     fasta_contents = f.readlines()
 seq_count = fasta_contents.count(">")
 if seq_count == 1:
