@@ -77,7 +77,7 @@ output_type = sys.argv[6]  # file endsing for PSSM file
 blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
-
+seq_name = fasta_file.split("/")[-1].split(".")[0]
 single_file = out_dir+"/"+seq_name+".sing"
 fasta_contents = []
 with open(fname) as f:
@@ -98,9 +98,7 @@ else:
 
 
 # strings and data structures we need
-seq_name = fasta_file.split("/")[-1].split(".")[0]
 file_contents = read_file(single_file)
-
 
 entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
