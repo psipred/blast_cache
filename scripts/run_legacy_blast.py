@@ -78,22 +78,28 @@ blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
 
-# strings and data structures we need
-seq_name = fasta_file.split("/")[-1].split(".")[0]
-file_contents = read_file(fasta_file)
-seq_count = file_contents.count(">")
+single_file = out_dir+"/"+seq_name+".sing"
+fasta_contents = []
+with open(fname) as f:
+    fasta_contents = f.readlines()
+seq_count = fasta_contents.count(">")
 if seq_count == 1:
-    with open(out_dir+"/"+seq_name+".sing", 'w') as sing:
+    with open(single_file, 'w') as sing:
         sing.write(file_contents)
 else:
     fasta_lines = file_contents.split()
-    with open(out_dir+"/"+seq_name+".sing", 'w') as sing:
+    with open(single_fileg", 'w') as sing:
         seq_count = 0
         for line in fasta_lines:
             if line.startswith(">"):
                 seq_count += 1
             if seq_count == 1:
                 sing.write(line.replace("-", ""))
+
+
+# strings and data structures we need
+seq_name = fasta_file.split("/")[-1].split(".")[0]
+file_contents = read_file(single_file)
 
 
 entry_uri = base_uri+"/blast_cache/entry/"
