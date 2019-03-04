@@ -111,10 +111,10 @@ if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = ''
     if output_type == "chk6":
-        cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
+        cmd = blast_bin+"/blastpgp -i "+single_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
             blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml -R "+out_dir+"/"+seq_name+".chk "+blast_settings
     else:
-        cmd = blast_bin+"/blastpgp -i "+fasta_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
+        cmd = blast_bin+"/blastpgp -i "+single_file+" -C "+out_dir+"/"+seq_name+"."+output_type+" -d " + \
             blast_db+" -m 7 -o "+out_dir+"/"+seq_name+".xml "+blast_settings
     print(cmd)
     start_time = time.time()
@@ -124,7 +124,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
     with open(out_dir+"/"+seq_name+".pn", 'w') as pn:
         pn.write(out_dir+"/"+seq_name+"."+output_type)
     with open(out_dir+"/"+seq_name+".sn", 'w') as sn:
-        sn.write(out_dir+"/"+fasta_file)
+        sn.write(out_dir+"/"+single_file)
     mm_cmd = blast_bin+"/makemat -P "+seq_name
     print(mm_cmd)
     start_time = time.time()
