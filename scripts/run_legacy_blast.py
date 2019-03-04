@@ -81,6 +81,21 @@ blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 # strings and data structures we need
 seq_name = fasta_file.split("/")[-1].split(".")[0]
 file_contents = read_file(fasta_file)
+seq_count = file_contents.count(">")
+if seq_count == 1:
+    with open(out_dir+"/"+seq_name+".sing", 'w') as sing:
+        sing.write(file_contents)
+else:
+    fasta_lines = file_contents.split()
+    with open(out_dir+"/"+seq_name+".sing", 'w') as sing:
+        seq_count = 0
+        for line in fasta_lines:
+            if line.startswith(">"):
+                seq_count += 1
+            if seq_count == 1:
+                sing.write(line.replace("-", ""))
+
+
 entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
@@ -88,7 +103,7 @@ request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-
+exit()
 if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = ''
