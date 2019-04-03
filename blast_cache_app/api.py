@@ -52,8 +52,11 @@ class EntryDetail(APIView):
         except Cache_entry.DoesNotExist:
             raise Http404
 
-    # @transaction.atomic()
+    @transaction.atomic()
     def get(self, request, md5, format=None):
+        block = False
+        if 'true' in request.GET.get('block'):
+            block=True
         hstore_key_list = ["file_data", ]
         # print(request.GET)
         key_size = len(request.GET)
@@ -64,9 +67,13 @@ class EntryDetail(APIView):
                     .filter(data__contains=request.GET)
         except Exception as e:
             # print(str(e))
+            if block:
+                ce = Cache_entry.objects.create(md5=md5)
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         if len(entries) == 0:
+            if block:
+                ce = Cache_entry.objects.create(md5=md5)
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         # print(len(entries))
@@ -82,6 +89,8 @@ class EntryDetail(APIView):
             return Response("Can't Unambiguously Resolve Request",
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if valid_count == 0:
+            if block:
+                ce = Cache_entry.objects.create(md5=md5)
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         serializer = CacheEntrySerializer(returning_entry)
