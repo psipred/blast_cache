@@ -5,6 +5,7 @@ import hashlib
 
 from django.http import Http404
 from django.http import QueryDict
+from django.db import transaction
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -51,6 +52,7 @@ class EntryDetail(APIView):
         except Cache_entry.DoesNotExist:
             raise Http404
 
+    # @transaction.atomic()
     def get(self, request, md5, format=None):
         hstore_key_list = ["file_data", ]
         # print(request.GET)
@@ -78,7 +80,7 @@ class EntryDetail(APIView):
 
         if valid_count > 1:
             return Response("Can't Unambiguously Resolve Request",
-                            status=status.HTTP_500_INTERNAT_SERVER_ERROR)
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if valid_count == 0:
             return Response("No Record Available",
                             status=status.HTTP_404_NOT_FOUND)
@@ -87,6 +89,7 @@ class EntryDetail(APIView):
         returning_entry.save()
         return Response(serializer.data)
 
+    @transaction.atomic()
     def post(self, request, format=None):
         data_copy = {}
         data_copy['name'] = request.data['name']

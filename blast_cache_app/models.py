@@ -42,6 +42,7 @@ class Cache_entry (TimeStampedModel):
     #                                  commandline options here.
     sequence = models.CharField(max_length=65536, unique=False, null=False,
                                 blank=False, db_index=True)
+    # blocked = models.BooleanField(default=True)
 
     def __str__(self):
         return str(self.md5)

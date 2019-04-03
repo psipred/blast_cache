@@ -25,6 +25,8 @@ files.
 * blast_cache/list/ : List every single entry in the db
 * blast_cache/list/[MD5] : list all unexpired entries in the db with this MD5
 * blast_cache/entry/[MD5]?[param...]=[value]... : retrieve unexpired single unique record given MD5 and uniquely specifying params
+* blast_cache/entry/[MD5]?[param...]=[value]&block=true... : retrieve unexpired single unique record given MD5 and uniquely specifying params and if not present create a record and set it to blocked
+
 
 2. POST Requests
 * blast_cache/entry : required fields include
