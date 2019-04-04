@@ -53,6 +53,7 @@ class CacheEntryFactory(factory.DjangoModelFactory):
             "-num_descriptions": random.randint(1, 5000),
             "file_data": read_file(file_type)}
     sequence = random_string(length=120)
+    blocked = True
 
     class Meta:
         model = Cache_entry

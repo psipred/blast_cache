@@ -6,6 +6,7 @@ import hashlib
 from django.http import Http404
 from django.http import QueryDict
 from django.db import transaction
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -54,27 +55,45 @@ class EntryDetail(APIView):
 
     @transaction.atomic()
     def get(self, request, md5, format=None):
+        # print(Cache_entry.objects.all())
         block = False
-        if 'true' in request.GET.get('block'):
-            block=True
+        request_copy = copy.deepcopy(request.GET)
+        request_copy.pop('block', None)
+        if request.GET.get('block'):
+            if 'true' in request.GET.get('block'):
+                block = True
         hstore_key_list = ["file_data", ]
         # print(request.GET)
-        key_size = len(request.GET)
-        # print("key size", key_size, request.GET)
+        key_size = len(request_copy)
+        # print("key size", key_size, request_copy)
+        # print(request_copy)
         try:
             entries = Cache_entry.objects.all().filter(md5=md5)\
                     .filter(expiry_date__gte=datetime.date.today())\
-                    .filter(data__contains=request.GET)
+                    .filter(data__contains=request_copy)
         except Exception as e:
             # print(str(e))
             if block:
-                ce = Cache_entry.objects.create(md5=md5)
-            return Response("No Record Available",
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True)
+                return Response("No Objects Found. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Objects Available",
                             status=status.HTTP_404_NOT_FOUND)
+        # print("FOUND ENTRIES: "+str(entries))
         if len(entries) == 0:
             if block:
-                ce = Cache_entry.objects.create(md5=md5)
-            return Response("No Record Available",
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True)
+                return Response("No Entries Available. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Entries Available",
                             status=status.HTTP_404_NOT_FOUND)
         # print(len(entries))
         valid_count = 0
@@ -90,8 +109,15 @@ class EntryDetail(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if valid_count == 0:
             if block:
-                ce = Cache_entry.objects.create(md5=md5)
-            return Response("No Record Available",
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True
+                                                )
+                return Response("No Valid Record Available. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Valid Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         serializer = CacheEntrySerializer(returning_entry)
         returning_entry.accessed_count += 1
