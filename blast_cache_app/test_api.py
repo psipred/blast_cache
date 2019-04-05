@@ -465,8 +465,22 @@ class CacheEntryTests(APITestCase):
         response.render()
         self.assertEqual(response.status_code, 200)
 
-    def test_create_blocked_record_if_no_valid_in_db_and_blocked_true(self):
+    def test_create_blocked_record_if_none_in_db_and_blocked_true(self):
         md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
+        response = self.client.get(reverse('entryDetail',
+                                           args=[md5, ])+".json?"
+                                                         "block=true"
+                                   )
+        response.render()
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_blocked_record_if_expired_in_db(self):
+        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
+        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5=md5,
+                                       data=self.insert_settings())
         response = self.client.get(reverse('entryDetail',
                                            args=[md5, ])+".json?"
                                                          "block=true"
