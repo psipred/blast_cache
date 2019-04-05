@@ -135,6 +135,11 @@ class EntryDetail(APIView):
         data_copy['data'] = request.data['data']
         data_copy['sequence'] = request.data['sequence']
 
+        block = True
+        if request.GET.get('block'):
+            if 'false' in request.GET.get('block'):
+                block = False
+
         if type(data_copy['data']) is not dict and \
            type(data_copy['data']) is str:
             try:
@@ -157,6 +162,18 @@ class EntryDetail(APIView):
             except Exception as e:
                 pass
             if entry is not None:
+                if not block:
+                    entry.name = data_copy['name']
+                    entry.md5 = data_copy['md5']
+                    entry.file_type = data_copy['file_type']
+                    entry.runtime = data_copy['runtime']
+                    entry.blast_hit_count = data_copy['blast_hit_count']
+                    entry.data = data_copy['data']
+                    entry.sequence = data_copy['sequence']
+                    entry.blocked = False
+                    entry.save()
+                    return Response("Record Updated",
+                                    status=status.HTTP_200_OK)
                 return Response("Valid Record Available",
                                 status=status.HTTP_409_CONFLICT)
 

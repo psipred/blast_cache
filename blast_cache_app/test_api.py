@@ -487,13 +487,35 @@ class CacheEntryTests(APITestCase):
         self.assertIn('"blocked":true', response.content.decode("utf-8"))
 
     def test_record_blocked_gets_unblocked_by_post(self):
-        # client 1: get and block
-        # client 1: posts record and sets blocked to false
-        pass
+        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
+        response = self.client.get(reverse('entryDetail',
+                                           args=[md5, ])+".json?"
+                                                         "block=true"
+                                   )
+        url = reverse('entryDetail')+"?block=false"
+        data = self.example_post_data
+        data['md5'] = md5
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, 200)
 
     def test_integration_test_two_clients_with_post(self):
-        # client 1: get and block
-        # client 2: get clocked record
-        # client 1: post record
-        # client 2: gets returns record
-        pass
+        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
+        response = self.client.get(reverse('entryDetail',
+                                           args=[md5, ])+".json?"
+                                                         "block=true"
+                                   )
+
+        response = self.client.get(reverse('entryDetail',
+                                           args=[md5, ])+".json?")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('"blocked":true', response.content.decode("utf-8"))
+
+        url = reverse('entryDetail')+"?block=false"
+        data = self.example_post_data
+        data['md5'] = md5
+        response = self.client.post(url, data, format='json')
+
+        response = self.client.get(reverse('entryDetail',
+                                           args=[md5, ])+".json?")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('"blocked":false', response.content.decode("utf-8"))
