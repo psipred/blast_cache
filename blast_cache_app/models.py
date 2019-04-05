@@ -27,22 +27,22 @@ class Cache_entry (TimeStampedModel):
         (PSSM, "pssm"),
         (MTX, "mtx"),
     )
-    name = models.CharField(max_length=128, unique=False, null=False,
+    name = models.CharField(max_length=128, unique=False, null=True,
                             blank=False, db_index=True)
     md5 = models.CharField(max_length=64, unique=False, null=False,
                            blank=False, db_index=True)
     # hash of the blast sequence
     accessed_count = models.IntegerField(default=0, null=False, blank=False)
     expiry_date = models.DateField(auto_now_add=False)  # set on save
-    file_type = models.IntegerField(null=False, blank=False,
+    file_type = models.IntegerField(null=True, blank=False,
                                     choices=FILE_CHOICES, default=MTX)
     blast_hit_count = models.IntegerField(default=0, null=False, blank=False)
     runtime = models.IntegerField(default=0, null=False, blank=False)
     data = HStoreField(null=True, )  # we store the pssm text data and the
     #                                  commandline options here.
-    sequence = models.CharField(max_length=65536, unique=False, null=False,
+    sequence = models.CharField(max_length=65536, unique=False, null=True,
                                 blank=False, db_index=True)
-    # blocked = models.BooleanField(default=True)
+    blocked = models.BooleanField(default=True, null=False)
 
     def __str__(self):
         return str(self.md5)

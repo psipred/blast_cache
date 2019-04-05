@@ -6,6 +6,7 @@ import hashlib
 from django.http import Http404
 from django.http import QueryDict
 from django.db import transaction
+from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -52,22 +53,47 @@ class EntryDetail(APIView):
         except Cache_entry.DoesNotExist:
             raise Http404
 
-    # @transaction.atomic()
+    @transaction.atomic()
     def get(self, request, md5, format=None):
+        # print(Cache_entry.objects.all())
+        block = False
+        request_copy = copy.deepcopy(request.GET)
+        request_copy.pop('block', None)
+        if request.GET.get('block'):
+            if 'true' in request.GET.get('block'):
+                block = True
         hstore_key_list = ["file_data", ]
         # print(request.GET)
-        key_size = len(request.GET)
-        # print("key size", key_size, request.GET)
+        key_size = len(request_copy)
+        # print("key size", key_size, request_copy)
+        # print(request_copy)
         try:
             entries = Cache_entry.objects.all().filter(md5=md5)\
                     .filter(expiry_date__gte=datetime.date.today())\
-                    .filter(data__contains=request.GET)
+                    .filter(data__contains=request_copy)
         except Exception as e:
             # print(str(e))
-            return Response("No Record Available",
+            if block:
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True)
+                return Response("No Objects Found. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Objects Available",
                             status=status.HTTP_404_NOT_FOUND)
+        # print("FOUND ENTRIES: "+str(entries))
         if len(entries) == 0:
-            return Response("No Record Available",
+            if block:
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True)
+                return Response("No Entries Available. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Entries Available",
                             status=status.HTTP_404_NOT_FOUND)
         # print(len(entries))
         valid_count = 0
@@ -82,7 +108,16 @@ class EntryDetail(APIView):
             return Response("Can't Unambiguously Resolve Request",
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if valid_count == 0:
-            return Response("No Record Available",
+            if block:
+                ce = Cache_entry.objects.create(md5=md5,
+                                                expiry_date=datetime.date.today() +
+                                                datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
+                                                data={"file_data": None},
+                                                blocked=True
+                                                )
+                return Response("No Valid Record Available. Holding Record Created",
+                                status=status.HTTP_201_CREATED)
+            return Response("No Valid Record Available",
                             status=status.HTTP_404_NOT_FOUND)
         serializer = CacheEntrySerializer(returning_entry)
         returning_entry.accessed_count += 1
@@ -99,6 +134,11 @@ class EntryDetail(APIView):
         data_copy['blast_hit_count'] = request.data['blast_hit_count']
         data_copy['data'] = request.data['data']
         data_copy['sequence'] = request.data['sequence']
+
+        block = True
+        if request.GET.get('block'):
+            if 'false' in request.GET.get('block'):
+                block = False
 
         if type(data_copy['data']) is not dict and \
            type(data_copy['data']) is str:
@@ -122,6 +162,18 @@ class EntryDetail(APIView):
             except Exception as e:
                 pass
             if entry is not None:
+                if not block:
+                    entry.name = data_copy['name']
+                    entry.md5 = data_copy['md5']
+                    entry.file_type = data_copy['file_type']
+                    entry.runtime = data_copy['runtime']
+                    entry.blast_hit_count = data_copy['blast_hit_count']
+                    entry.data = data_copy['data']
+                    entry.sequence = data_copy['sequence']
+                    entry.blocked = False
+                    entry.save()
+                    return Response("Record Updated",
+                                    status=status.HTTP_200_OK)
                 return Response("Valid Record Available",
                                 status=status.HTTP_409_CONFLICT)
 
