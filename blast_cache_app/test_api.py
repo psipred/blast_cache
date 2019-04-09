@@ -7,7 +7,7 @@ import datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status

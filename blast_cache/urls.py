@@ -21,7 +21,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from blast_cache_app import api
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^blast_cache/', include('blast_cache_app.urls')),
 
     url(r'^blast_cache/entry/$', api.EntryDetail.as_view(), name="entryDetail"),
@@ -32,8 +32,8 @@ urlpatterns = [
     url(r'^blast_cache/list/(?P<md5>\S{32})$', api.EntryList.as_view(),
         name="entryList"),
 
-    url(r'^login/$', auth_views.login),
-    url(r'^logout/$', auth_views.logout),
+    url(r'^login/$', auth_views.LoginView),
+    url(r'^logout/$', auth_views.LogoutView),
     url(r'^api-auth/', include('rest_framework.urls',
         namespace='rest_framework')),
 ]
