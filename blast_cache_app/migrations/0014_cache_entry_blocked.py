@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blast_cache_app', '0014_initial'),
+        ('blast_cache_app', '0013_initial'),
     ]
 
     operations = [
