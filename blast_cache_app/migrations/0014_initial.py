@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('runtime', models.IntegerField(default=0)),
                 ('data', django.contrib.postgres.fields.hstore.HStoreField(null=True)),
                 ('sequence', models.CharField(db_index=True, max_length=65536, null=True)),
-                ('blocked', models.BooleanField(default=False)),
+                # ('blocked', models.BooleanField(default=False)),
             ],
             options={
                 'ordering': ('created',),
