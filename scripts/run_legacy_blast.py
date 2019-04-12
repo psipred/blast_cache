@@ -106,7 +106,11 @@ request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-if r.status_code == 404 and "No Record Available" in r.text:
+# if r.status_code == 404 and "No Record Available" in r.text:
+if r.status_code == 404 and ("No Record Available" in r.text or
+                             "No Entries Available" in r.text or
+                             "No Objects Available" in r.text or
+                             "No Valid Record Available" in r.text):
     print("Running blast")
     cmd = ''
     if output_type == "chk6":
