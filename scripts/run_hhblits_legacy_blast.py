@@ -192,7 +192,13 @@ request_data = dict(zip(i, i))
 
 os.environ['HHLIB'] = hhblits_root
 
-r = requests.get(entry_query, params=request_data)
+wait = True
+while wait:
+    r = requests.get(entry_query, params=request_data)
+    if r.status_code = 200
+
+exit()
+
 print("Sending md5: " + file_contents['md5'])
 print("Cache Response:", r.status_code)
 print("Cache Response:", r.text)
@@ -206,6 +212,7 @@ hh_e_value = set_hh_evalue(file_contents)
 if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
+
 
 if r.status_code == 404 and ("No Record Available" in r.text or
                              "No Entries Available" in r.text or
