@@ -85,7 +85,9 @@ class EntryDetail(APIView):
             return Response("No Objects Available",
                             status=status.HTTP_404_NOT_FOUND)
         all = Cache_entry.objects.all()
-        # print(entries[0].data)
+        # for entry in entries:
+        #     print(entry)
+        # print(str(entries))
         if len(entries) == 0:
             if block:
                 ce = Cache_entry.objects.create(md5=md5,
@@ -101,12 +103,12 @@ class EntryDetail(APIView):
         returning_entry = None
         for entry in entries:
             # print("entry key size", len(entry.data.keys()), entry.data.keys())
-            if len(entry.data.keys()) == 0 and len(entry.data.keys()) == key_size:
-                returning_entry = entry
-                valid_count += 1
-            if len(entry.data.keys()) == key_size+1:
-                returning_entry = entry
-                valid_count += 1
+            key_size_adjuster = 0
+            if 'file_data' in entry.data.keys():
+                key_size_adjuster+=1
+            if len(entry.data.keys()) == key_size+key_size_adjuster:
+                    returning_entry = entry
+                    valid_count += 1
 
         if valid_count > 1:
             return Response("Can't Unambiguously Resolve Request",
@@ -138,7 +140,8 @@ class EntryDetail(APIView):
         data_copy['blast_hit_count'] = request.data['blast_hit_count']
         data_copy['data'] = request.data['data']
         data_copy['sequence'] = request.data['sequence']
-
+        data_copy['data'] = data_copy['data'].replace("'block': 'true', ", '')
+        data_copy['data'] = data_copy['data'].replace("'block': 'false', ", '')
         block = True
         # print(request.GET)
         # print(request.data)
@@ -149,6 +152,7 @@ class EntryDetail(APIView):
             if 'false' in request.GET.get('block'):
                 block = False
 
+        print(block)
         if type(data_copy['data']) is not dict and \
            type(data_copy['data']) is str:
             try:
@@ -162,7 +166,7 @@ class EntryDetail(APIView):
         if serializer.is_valid():
             entry = None
             search_components = copy.deepcopy(serializer.validated_data['data'])
-            # print(search_components)
+            print(search_components)
             search_components.pop('file_data', None)
             search_components.pop('block', None)
             try:

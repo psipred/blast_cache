@@ -24,7 +24,7 @@ import time
 #
 # MUST SET HHLIB to match the HH-suite version see line 108
 # USEAGE
-# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/blast-2.2.26/bin/ mtx /scratch0/NOT_BACKED_UP/dbuchan/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta /home/dbuchan/Code/blast_cache/files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/blast-2.2.26/bin/ mtx /scratch0/NOT_BACKED_UP/dbuchan/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/Applications/blast-2.2.26/bin/ mtx /opt/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
