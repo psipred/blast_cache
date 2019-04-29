@@ -59,13 +59,14 @@ class EntryDetail(APIView):
         block = False
         request_copy = copy.deepcopy(request.GET)
         request_copy.pop('block', None)
+        request_copy.pop('file_data', None)
         if request.GET.get('block'):
             if 'true' in request.GET.get('block'):
                 block = True
         hstore_key_list = ["file_data", ]
-        # print(request.GET)
         key_size = len(request_copy)
-        # print("key size", key_size, request_copy)
+        # print("KEY SIZE", key_size)
+        all_entries = Cache_entry.objects.all()
         # print(request_copy)
         try:
             entries = Cache_entry.objects.all().filter(md5=md5)\
@@ -77,29 +78,32 @@ class EntryDetail(APIView):
                 ce = Cache_entry.objects.create(md5=md5,
                                                 expiry_date=datetime.date.today() +
                                                 datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
-                                                data={"file_data": None},
+                                                data=request_copy,
                                                 blocked=True)
                 return Response("No Objects Found. Holding Record Created",
                                 status=status.HTTP_201_CREATED)
             return Response("No Objects Available",
                             status=status.HTTP_404_NOT_FOUND)
-        # print("FOUND ENTRIES: "+str(entries))
+        all = Cache_entry.objects.all()
+        # print(entries[0].data)
         if len(entries) == 0:
             if block:
                 ce = Cache_entry.objects.create(md5=md5,
                                                 expiry_date=datetime.date.today() +
                                                 datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
-                                                data={"file_data": None},
+                                                data=request_copy,
                                                 blocked=True)
                 return Response("No Entries Available. Holding Record Created",
                                 status=status.HTTP_201_CREATED)
             return Response("No Entries Available",
                             status=status.HTTP_404_NOT_FOUND)
-        # print(len(entries))
         valid_count = 0
         returning_entry = None
         for entry in entries:
             # print("entry key size", len(entry.data.keys()), entry.data.keys())
+            if len(entry.data.keys()) == 0 and len(entry.data.keys()) == key_size:
+                returning_entry = entry
+                valid_count += 1
             if len(entry.data.keys()) == key_size+1:
                 returning_entry = entry
                 valid_count += 1
@@ -112,7 +116,7 @@ class EntryDetail(APIView):
                 ce = Cache_entry.objects.create(md5=md5,
                                                 expiry_date=datetime.date.today() +
                                                 datetime.timedelta(days=settings.CACHE_EXPIRY_PERIOD),
-                                                data={"file_data": None},
+                                                data=request_copy,
                                                 blocked=True
                                                 )
                 return Response("No Valid Record Available. Holding Record Created",
@@ -136,6 +140,11 @@ class EntryDetail(APIView):
         data_copy['sequence'] = request.data['sequence']
 
         block = True
+        # print(request.GET)
+        # print(request.data)
+        if 'block' in request.data:
+            if 'false' in request.data['block']:
+                block = False
         if request.GET.get('block'):
             if 'false' in request.GET.get('block'):
                 block = False
@@ -153,7 +162,9 @@ class EntryDetail(APIView):
         if serializer.is_valid():
             entry = None
             search_components = copy.deepcopy(serializer.validated_data['data'])
+            # print(search_components)
             search_components.pop('file_data', None)
+            search_components.pop('block', None)
             try:
                 entry = Cache_entry.objects.get(
                         md5=serializer.validated_data['md5'],
@@ -161,6 +172,7 @@ class EntryDetail(APIView):
                         data__contains=search_components)
             except Exception as e:
                 pass
+            # print("BLOCK STATUS", block)
             if entry is not None:
                 if not block:
                     entry.name = data_copy['name']

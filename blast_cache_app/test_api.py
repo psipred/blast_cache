@@ -48,6 +48,7 @@ class CacheEntryTests(APITestCase):
         m = hashlib.md5()
         test_hash = m.update(test_seq.encode('utf-8'))
         self.md5 = m.hexdigest()
+        # print(self.md5)
         self.ce = CacheEntryFactory.create()
 
         self.pssm = SimpleUploadedFile('test.pssm',
@@ -268,6 +269,7 @@ class CacheEntryTests(APITestCase):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="409287263fd0724ceff070ff1e793964",
                                        accessed_count=0,
                                        data=self.insert_settings())
         response = self.client.get(reverse('entryDetail',
@@ -276,6 +278,7 @@ class CacheEntryTests(APITestCase):
                                                              "-num_descriptio"
                                                              "ns=500")
         response.render()
+        #print(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("\"accessed_count\":1", response.content.decode("utf-8"))
         response = self.client.get(reverse('entryDetail',
@@ -330,20 +333,21 @@ class CacheEntryTests(APITestCase):
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
                                        data=self.insert_settings())
-        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
-                                       datetime.timedelta(
-                                       days=settings.CACHE_EXPIRY_PERIOD),
-                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
-                                       data={"-num_cores": 20,
-                                             "-num_descriptions": 500,
-                                             "file_data": self.read_pssm()})
+        # ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+        #                                datetime.timedelta(
+        #                                days=settings.CACHE_EXPIRY_PERIOD),
+        #                                md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+        #                                data={"-num_cores": 20,
+        #                                      "-num_descriptions": 500,
+        #                                      "file_data": self.read_pssm()})
         response = self.client.get(reverse('entryDetail',
                                            args=[ce1.md5, ])+".json?"
                                                              "-num_alignments"
-                                                             "=20&"
+                                                             "=200&"
                                                              "-num_descriptio"
                                                              "ns=500")
         response.render()
+        # print(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 404)
 
     def test_return_no_list_if_md5_does_not_exist(self):
@@ -497,6 +501,7 @@ class CacheEntryTests(APITestCase):
         response.render()
         response = self.client.get(reverse('entryDetail',
                                            args=[md5, ])+".json?")
+        # print(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 200)
         self.assertIn('"blocked":true', response.content.decode("utf-8"))
 
@@ -518,7 +523,6 @@ class CacheEntryTests(APITestCase):
                                            args=[md5, ])+".json?"
                                                          "block=true"
                                    )
-
         response = self.client.get(reverse('entryDetail',
                                            args=[md5, ])+".json?")
         self.assertEqual(response.status_code, 200)
@@ -528,7 +532,6 @@ class CacheEntryTests(APITestCase):
         data = self.example_post_data
         data['md5'] = md5
         response = self.client.post(url, data, format='json')
-
         response = self.client.get(reverse('entryDetail',
                                            args=[md5, ])+".json?")
         self.assertEqual(response.status_code, 200)

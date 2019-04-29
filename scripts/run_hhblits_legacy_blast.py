@@ -11,6 +11,7 @@ import time
 import math
 import json
 import re
+import time
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -23,6 +24,8 @@ import re
 #
 # MUST SET HHLIB to match the HH-suite version see line 108
 # USEAGE
+# python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/blast-2.2.26/bin/ mtx /scratch0/NOT_BACKED_UP/dbuchan/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
+
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/Applications/blast-2.2.26/bin/ mtx /opt/Applications/hh-suite-3/ /scratch1/NOT_BACKED_UP/dbuchan/hhblitsdb/uniclust30_2017_10/uniclust30_2017_10 -a 12 -b 0 -j 2 -h 0.01
 
 # python scripts/run_hhblits_legacy_blast.py ./files/P04591.fasta ~/tmp_cache http://128.16.14.80 /opt/blast-2.2.26/bin/ mtx /opt/hh-suite/ /data/hhdb/uniclust30_2018_08/uniclust30_2018_08 NULL -a 12 -b 0 -j 2 -h 0.01
@@ -177,6 +180,7 @@ seq_name = fasta_file.split("/")[-1].split(".")[0]
 file_contents = read_file(fasta_file)
 blast_input = fasta_file
 sn_name = seq_name+".fasta"
+
 if file_contents['single']:
     single_out = open(out_dir+"/"+seq_name+".sing", 'w')
     single_out.write(">single\n")
@@ -190,14 +194,19 @@ entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
+request_data['block']='true'
 os.environ['HHLIB'] = hhblits_root
 
 wait = True
 while wait:
     r = requests.get(entry_query, params=request_data)
-    if r.status_code = 200
-
-exit()
+    if r.status_code == 201:
+        wait = False
+    if r.status_code == 200 and '"blocked":true' in r.text:
+        print(r.text)
+        time.sleep(30)
+    if r.status_code == 200 and '"blocked":false' in r.text:
+        wait = False
 
 print("Sending md5: " + file_contents['md5'])
 print("Cache Response:", r.status_code)
@@ -214,10 +223,10 @@ if output_type == 'mtx6':
     iterations = "1"
 
 
-if r.status_code == 404 and ("No Record Available" in r.text or
-                             "No Entries Available" in r.text or
-                             "No Objects Available" in r.text or
-                             "No Valid Record Available" in r.text):
+if (r.status_code == 404 and ("No Record Available" in r.text or
+                              "No Entries Available" in r.text or
+                              "No Objects Available" in r.text or
+                              "No Valid Record Available" in r.text)) or r.status_code == 201:
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   fasta_file+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
@@ -284,7 +293,7 @@ if r.status_code == 404 and ("No Record Available" in r.text or
         shutil.copy(fasta_file, out_dir)
     except Exception as e:
         pass
-    print("Running blast")
+    print("Running makemat")
     print(pn_cmd)
     print(sn_cmd)
     print(makemat_cmd)
@@ -307,6 +316,7 @@ if r.status_code == 404 and ("No Record Available" in r.text or
                   "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "sequence": file_contents['seq'],
+                  "block": 'false',
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     r = requests.post(entry_uri, data=entry_data)

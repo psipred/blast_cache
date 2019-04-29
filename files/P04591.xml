@@ -4,9 +4,9 @@
   <BlastOutput_program>blastp</BlastOutput_program>
   <BlastOutput_version>blastp 2.2.26 [Sep-21-2011]</BlastOutput_version>
   <BlastOutput_reference>~Reference: Altschul, Stephen F., Thomas L. Madden, Alejandro A. Schaffer, ~Jinghui Zhang, Zheng Zhang, Webb Miller, and David J. Lipman (1997), ~&quot;Gapped BLAST and PSI-BLAST: a new generation of protein database search~programs&quot;,  Nucleic Acids Res. 25:3389-3402.</BlastOutput_reference>
-  <BlastOutput_db>./files/P04591.a3m</BlastOutput_db>
+  <BlastOutput_db>/home/dbuchan/Code/blast_cache/files/P04591.flat</BlastOutput_db>
   <BlastOutput_query-ID>lcl|QUERY</BlastOutput_query-ID>
-  <BlastOutput_query-def>sp|P04591|G_HV1H2 Gag polyprotein OS=Human immunodeficiency virus type 1 group M subtype B (isolate HXB2) GN=gag PE=1 SV=3</BlastOutput_query-def>
+  <BlastOutput_query-def>single</BlastOutput_query-def>
   <BlastOutput_query-len>500</BlastOutput_query-len>
   <BlastOutput_param>
     <Parameters>
@@ -23,11 +23,11 @@
       <Iteration_iter-num>1</Iteration_iter-num>
       <Iteration_stat>
         <Statistics>
-          <Statistics_db-num>4878</Statistics_db-num>
-          <Statistics_db-len>713274</Statistics_db-len>
-          <Statistics_hsp-len>80</Statistics_hsp-len>
-          <Statistics_eff-space>1.35674e+08</Statistics_eff-space>
-          <Statistics_kappa>0.0302243</Statistics_kappa>
+          <Statistics_db-num>2487</Statistics_db-num>
+          <Statistics_db-len>307449</Statistics_db-len>
+          <Statistics_hsp-len>73</Statistics_hsp-len>
+          <Statistics_eff-space>5.37584e+07</Statistics_eff-space>
+          <Statistics_kappa>0.0322257</Statistics_kappa>
           <Statistics_lambda>0.267</Statistics_lambda>
           <Statistics_entropy>0.14</Statistics_entropy>
         </Statistics>
@@ -37,11 +37,11 @@
       <Iteration_iter-num>2</Iteration_iter-num>
       <Iteration_stat>
         <Statistics>
-          <Statistics_db-num>4878</Statistics_db-num>
-          <Statistics_db-len>713274</Statistics_db-len>
-          <Statistics_hsp-len>80</Statistics_hsp-len>
-          <Statistics_eff-space>1.35674e+08</Statistics_eff-space>
-          <Statistics_kappa>0.0390311</Statistics_kappa>
+          <Statistics_db-num>2487</Statistics_db-num>
+          <Statistics_db-len>307449</Statistics_db-len>
+          <Statistics_hsp-len>73</Statistics_hsp-len>
+          <Statistics_eff-space>5.37584e+07</Statistics_eff-space>
+          <Statistics_kappa>0.0397294</Statistics_kappa>
           <Statistics_lambda>0.267</Statistics_lambda>
           <Statistics_entropy>0.14</Statistics_entropy>
         </Statistics>

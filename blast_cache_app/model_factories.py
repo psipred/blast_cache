@@ -18,7 +18,7 @@ def random_string(length=10):
 
 
 def produce_sequence_hash():
-    test_seq = random_string(length=240)
+    test_seq = factory.fuzzy.FuzzyText(length=240, chars=string.ascii_letters).fuzz()
     m = hashlib.md5()
     test_hash = m.update(test_seq.encode('utf-8'))
     return(m.hexdigest())
@@ -53,7 +53,7 @@ class CacheEntryFactory(factory.DjangoModelFactory):
             "-num_descriptions": random.randint(1, 5000),
             "file_data": read_file(file_type)}
     sequence = random_string(length=120)
-    blocked = True
+    blocked = False
 
     class Meta:
         model = Cache_entry

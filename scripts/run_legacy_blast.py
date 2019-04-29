@@ -9,6 +9,7 @@ import time
 import math
 import json
 import shutil
+import time
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -103,8 +104,17 @@ entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
+request_data['block']='true'
 
-r = requests.get(entry_query, params=request_data)
+wait = True
+while wait:
+    r = requests.get(entry_query, params=request_data)
+    if r.status_code == 201:
+        wait = False
+    if r.status_code == 200 and '"blocked":true' in r.text:
+        # print(r.text)
+        time.sleep(30)
+
 print("Cache Response:", r.status_code)
 # if r.status_code == 404 and "No Record Available" in r.text:
 if r.status_code == 404 and ("No Record Available" in r.text or
@@ -148,6 +158,7 @@ if r.status_code == 404 and ("No Record Available" in r.text or
     entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "sequence": file_contents['seq'],
+                  "blocked": 'false',
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     # print(entry_data['data'])
