@@ -7,7 +7,7 @@ import datetime
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.conf import settings
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from rest_framework.test import APIClient
 from rest_framework import status
@@ -48,7 +48,6 @@ class CacheEntryTests(APITestCase):
         m = hashlib.md5()
         test_hash = m.update(test_seq.encode('utf-8'))
         self.md5 = m.hexdigest()
-        # print(self.md5)
         self.ce = CacheEntryFactory.create()
 
         self.pssm = SimpleUploadedFile('test.pssm',
@@ -228,7 +227,6 @@ class CacheEntryTests(APITestCase):
 
 # GET TESTS BELOW
 
-
     def test_404_if_query_has_overlapping_but_not_same_number_of_params(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today(),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
@@ -236,7 +234,7 @@ class CacheEntryTests(APITestCase):
         response = self.client.get(reverse('entryDetail',
                                            args=[ce1.md5, ])+".json?"
                                                              "-num_iterations=20"
-                                   )
+                                                             )
         response.render()
         self.assertEqual(response.status_code, 404)
 
@@ -263,13 +261,12 @@ class CacheEntryTests(APITestCase):
         response.render()
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.content.decode("utf-8"),
-                         "\"No Entries Available\"")
+                         "\"No Record Available\"")
 
     def test_accessed_count_increments_with_each_request(self):
         ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
                                        datetime.timedelta(
                                        days=settings.CACHE_EXPIRY_PERIOD),
-                                       md5="409287263fd0724ceff070ff1e793964",
                                        accessed_count=0,
                                        data=self.insert_settings())
         response = self.client.get(reverse('entryDetail',
@@ -278,7 +275,6 @@ class CacheEntryTests(APITestCase):
                                                              "-num_descriptio"
                                                              "ns=500")
         response.render()
-        #print(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 200)
         self.assertIn("\"accessed_count\":1", response.content.decode("utf-8"))
         response = self.client.get(reverse('entryDetail',
@@ -333,21 +329,20 @@ class CacheEntryTests(APITestCase):
                                        days=settings.CACHE_EXPIRY_PERIOD),
                                        md5="ac1a602a913db2ab48fbf5b1a9e1269a",
                                        data=self.insert_settings())
-        # ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
-        #                                datetime.timedelta(
-        #                                days=settings.CACHE_EXPIRY_PERIOD),
-        #                                md5="ac1a602a913db2ab48fbf5b1a9e1269a",
-        #                                data={"-num_cores": 20,
-        #                                      "-num_descriptions": 500,
-        #                                      "file_data": self.read_pssm()})
+        ce2 = CacheEntryFactory.create(expiry_date=datetime.date.today() +
+                                       datetime.timedelta(
+                                       days=settings.CACHE_EXPIRY_PERIOD),
+                                       md5="ac1a602a913db2ab48fbf5b1a9e1269a",
+                                       data={"-num_cores": 20,
+                                             "-num_descriptions": 500,
+                                             "file_data": self.read_pssm()})
         response = self.client.get(reverse('entryDetail',
                                            args=[ce1.md5, ])+".json?"
                                                              "-num_alignments"
-                                                             "=200&"
+                                                             "=20&"
                                                              "-num_descriptio"
                                                              "ns=500")
         response.render()
-        # print(response.content.decode("utf-8"))
         self.assertEqual(response.status_code, 404)
 
     def test_return_no_list_if_md5_does_not_exist(self):
@@ -468,71 +463,3 @@ class CacheEntryTests(APITestCase):
                                                              "ns=500")
         response.render()
         self.assertEqual(response.status_code, 200)
-
-    def test_create_blocked_record_if_none_in_db_and_blocked_true(self):
-        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?"
-                                                         "block=true"
-                                   )
-        response.render()
-        self.assertEqual(response.status_code, 201)
-
-    def test_create_blocked_record_if_expired_in_db(self):
-        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
-        ce1 = CacheEntryFactory.create(expiry_date=datetime.date.today() -
-                                       datetime.timedelta(
-                                       days=settings.CACHE_EXPIRY_PERIOD),
-                                       md5=md5,
-                                       data=self.insert_settings())
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?"
-                                                         "block=true"
-                                   )
-        response.render()
-        self.assertEqual(response.status_code, 201)
-
-    def test_create_blocked_record_and_respond_with_blocked_record(self):
-        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?"
-                                                         "block=true"
-                                   )
-        response.render()
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?")
-        # print(response.content.decode("utf-8"))
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('"blocked":true', response.content.decode("utf-8"))
-
-    def test_record_blocked_gets_unblocked_by_post(self):
-        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?"
-                                                         "block=true"
-                                   )
-        url = reverse('entryDetail')+"?block=false"
-        data = self.example_post_data
-        data['md5'] = md5
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, 200)
-
-    def test_integration_test_two_clients_with_post(self):
-        md5 = "ac1a602a913db2ab48fbf5b1a9e1269a"
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?"
-                                                         "block=true"
-                                   )
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('"blocked":true', response.content.decode("utf-8"))
-
-        url = reverse('entryDetail')+"?block=false"
-        data = self.example_post_data
-        data['md5'] = md5
-        response = self.client.post(url, data, format='json')
-        response = self.client.get(reverse('entryDetail',
-                                           args=[md5, ])+".json?")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('"blocked":false', response.content.decode("utf-8"))

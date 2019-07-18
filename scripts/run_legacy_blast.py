@@ -9,7 +9,6 @@ import time
 import math
 import json
 import shutil
-import time
 # arg 1 input fasta file
 # arg 2 output dir
 # arg 3 base uri
@@ -18,7 +17,7 @@ import time
 # arg 5 blast db
 
 #
-# python scripts/run_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/blast-2.2.26/bin/ /scratch1/NOT_BACKED_UP/dbuchan/uniref/pdb_aa.fasta -num_iterations 20 -num_alignments 500 -num_threads 2
+# python scripts/run_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /scratch0/NOT_BACKED_UP/dbuchan/Applications/ncbi-blast-2.2.31+/bin/ /scratch1/NOT_BACKED_UP/dbuchan/uniref/pdb_aa.fasta -num_iterations 20 -num_alignments 500 -num_threads 2
 #
 # python scripts/run_blast.py ./files/P04591.fasta ./files http://127.0.0.1:8000 /opt/ncbi-blast-2.5.0+/bin/ /opt/uniref/uniref90.fasta -num_iterations 20 -num_alignments 500 -num_threads 2
 
@@ -78,14 +77,6 @@ output_type = sys.argv[6]  # file endsing for PSSM file
 blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
-# print(fasta_file)
-# print(out_dir)
-# print(base_uri)
-# print(blast_bin)
-# print(blast_db)
-# print(output_type)
-# print(blast_settings)
-
 seq_name = fasta_file.split("/")[-1].split(".")[0]
 single_file = out_dir+"/"+seq_name+".sing"
 fasta_contents = []
@@ -112,25 +103,10 @@ entry_uri = base_uri+"/blast_cache/entry/"
 entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
-request_data['block']='true'
 
-wait = True
-while wait:
-    r = requests.get(entry_query, params=request_data)
-    if r.status_code == 201:
-        wait = False
-    if r.status_code == 200 and '"blocked":true' in r.text:
-        print(r.text)
-        time.sleep(30)
-    if r.status_code == 200 and '"blocked":false' in r.text:
-        wait = False
-
+r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-# if r.status_code == 404 and "No Record Available" in r.text:
-if r.status_code == 404 and ("No Record Available" in r.text or
-                             "No Entries Available" in r.text or
-                             "No Objects Available" in r.text or
-                             "No Valid Record Available" in r.text) or r.status_code == 201:
+if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = ''
     if output_type == "chk6":
@@ -168,7 +144,6 @@ if r.status_code == 404 and ("No Record Available" in r.text or
     entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
                   "sequence": file_contents['seq'],
-                  "block": 'false',
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     # print(entry_data['data'])

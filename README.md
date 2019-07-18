@@ -25,26 +25,16 @@ files.
 * blast_cache/list/ : List every single entry in the db
 * blast_cache/list/[MD5] : list all unexpired entries in the db with this MD5
 * blast_cache/entry/[MD5]?[param...]=[value]... : retrieve unexpired single unique record given MD5 and uniquely specifying params
-* blast_cache/entry/[MD5]?[param...]=[value]?block=true... : retrieve unexpired single unique record given MD5 and uniquely specifying params and if not present create a record and set it to blocked so other clients can wait until unblocked
+* blast_cache/entry/[MD5]?[param...]=[value]&block=true... : retrieve unexpired single unique record given MD5 and uniquely specifying params and if not present create a record and set it to blocked
 
-### Possible responses
-200: Valid record returned
-201: Temp record created and set to blocked
-404: current record not available, either not present or all are expires
-500: many ambiguous but seemingly valid records available, db is in a broken state for this records
 
 2. POST Requests
 * blast_cache/entry : required fields include
 
-### Possible responses
-201: New record created
-400: Input data is malformatted
-409: Can't post valid data as unexpired valid record already exists
-
 When posting PSSM string data it needs to be escaped properly so that it
 does not get read as json on submission (see line 98 of run_blast.py),
 .replace('"', '\\"').replace('\n', '\\n'). This also means that these
-escape sequences must be removed when data is retrieved. Posting a valid record sets a temp record to unblocked
+escape sequences must be removed when data is retrieved
 
 ### Required POST parameters
 
