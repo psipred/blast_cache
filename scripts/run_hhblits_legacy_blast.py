@@ -207,8 +207,10 @@ if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
 
-if r.status_code == 404 and "No Record Available" in r.text:
-
+if r.status_code == 404 and ("No Record Available" in r.text or
+                             "No Entries Available" in r.text or
+                             "No Objects Available" in r.text or
+                             "No Valid Record Available" in r.text):
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   fasta_file+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
@@ -306,6 +308,7 @@ if r.status_code == 404 and "No Record Available" in r.text:
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
+    print("Response Text", r.text)
     if r.status_code == 200:
         response_data = json.loads(r.text)
         if 'data' in response_data:
@@ -319,7 +322,7 @@ else:
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm
-            f.write(response_data['data']['file_data']+'\n')
+            f.write(response_data['data']['file_data'])
             f.close
             os.chmod(seq_name+"."+output_type, 0o666)
 
