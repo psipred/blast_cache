@@ -78,7 +78,7 @@ def get_pssm_data(path):
     else:
         eprint("Couldn't get PSSM data")
         exit(1)  # panic
-
+    pssm_data = pssm_data.rstrip("\n")
     return(pssm_data)
 
 
