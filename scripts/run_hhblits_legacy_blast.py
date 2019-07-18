@@ -78,7 +78,7 @@ def get_pssm_data(path):
     else:
         eprint("Couldn't get PSSM data")
         exit(1)  # panic
-    pssm_data = pssm_data.rstrip("\n")
+    # pssm_data = pssm_data.rstrip("\n")
     return(pssm_data)
 
 
@@ -339,7 +339,7 @@ else:
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm
-            f.write(response_data['data']['file_data']+'\n')
+            f.write(response_data['data']['file_data'])
             f.close
             os.chmod(seq_name+"."+output_type, 0o666)
 
