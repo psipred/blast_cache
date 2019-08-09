@@ -207,10 +207,16 @@ if output_type == 'mtx6':
     output_ending = ".a3m6"
     iterations = "1"
 
-if r.status_code == 404 and ("No Record Available" in r.text or
-                             "No Entries Available" in r.text or
-                             "No Objects Available" in r.text or
-                             "No Valid Record Available" in r.text):
+upload = True
+if r.status_code == 500:
+    upload = False
+
+# if r.status_code == 404 and ("No Record Available" in r.text or
+#                              "No Entries Available" in r.text or
+#                              "No Objects Available" in r.text or
+#                              "No Valid Record Available" in r.text):
+if r.status_code == 404 or r.status_code == 500:
+
     hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
                   fasta_file+" -oa3m " + \
                   out_dir+"/"+seq_name+output_ending + \
@@ -295,16 +301,19 @@ if r.status_code == 404 and ("No Record Available" in r.text or
     runtime = math.ceil(end_time-start_time)
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".mtx")
-    request_data["file_data"] = pssm_data
-    entry_data = {"name": seq_name, "file_type": 2,
-                  "md5": file_contents['md5'],
-                  "blast_hit_count": hit_count, "runtime": runtime,
-                  "sequence": file_contents['seq'],
-                  "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
-                  }
-    r = requests.post(entry_uri, data=entry_data)
-    print("Submission Response:", r.status_code)
-    print("Response: ", r.text)
+    if upload:
+        request_data["file_data"] = pssm_data
+        entry_data = {"name": seq_name, "file_type": 2,
+                      "md5": file_contents['md5'],
+                      "blast_hit_count": hit_count, "runtime": runtime,
+                      "sequence": file_contents['seq'],
+                      "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
+                      }
+        r = requests.post(entry_uri, data=entry_data)
+        print("Submission Response:", r.status_code)
+        print("Response: ", r.text)
+    else:
+        print("Not sent due to 500 error in server")
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
