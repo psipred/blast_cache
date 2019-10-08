@@ -41,7 +41,7 @@ class Cache_entry (TimeStampedModel):
     data = HStoreField(null=True, )  # we store the pssm text data and the
     #                                  commandline options here.
     sequence = models.CharField(max_length=65536, unique=False, null=False,
-                                blank=False, db_index=True)
+                                blank=False)
     # blocked = models.BooleanField(default=True)
 
     def __str__(self):
