@@ -8,15 +8,31 @@ files.
 1. yum install postgresql-contrib (for hstore extension)
 2. pip install -r requirements/base.txt
 3. Add blast_cache db to postgres
+   Add secrets files
+   touch base_secrets.json
+   touch dev_secrets.json
+
+   Add to base_secrets.json
+   {}
+   Add to dev secrets.json
+   {
+     "USER": "blast_cache_user",
+     "PASSWORD": "thisisthedevelopmentpassword",
+     "SECRET_KEY": "SOMELONG STRING"
+   }
+  log in to postgres and create:
+  CREATE ROLE blast_cache_user WITH LOGIN PASSWORD 'thisisthedevelopmentpassword';
+  CREATE DATABASE blast_cache;
+  GRANT ALL PRIVILEGES ON DATABASE blast_cache TO blast_cache_user;
+  ALTER USER blast_cache_user CREATEDB;
 4. Enable hstore extension (CREATE EXTENSION hstore)
 5. Create test template for the test db
     CREATE DATABASE hstemplate;
     \c hstemplate
     CREATE EXTENSION hstore;
     update pg_database set datistemplate=true  where datname='hstemplate';
-5. Add blast_cache_user to postgres
-    CREATE USER blast_cache_user WITH PASSWORD '';
-    ALTER USER username CREATEDB;
+    \c blast_cache
+    CREATE EXTENSION hstore;
 6. Run migrations
 7. Add 'manage.py createsuperuser'
 
