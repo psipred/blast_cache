@@ -66,3 +66,11 @@ python manage.py test --settings=blast_cache.settings.dev
 
 ## Start with
 python manage.py runserver --settings=blast_cache.settings.dev
+
+# Search Scripts
+
+The `scripts/` directory contains scripts that consume this cache API.
+
+### HHBlits Script notes
+
+HHBlits run time is profile length dependent. In degenerate cases this can cause HHBlits to appears to hang for what appears to be an indefinite period. The function `set_hh_evalue()` adjusts the e-value HHBlits uses to recruit sequences based on sequence length. Sequence bins were guestimated using a rough benchmark to sequence runtimes in 2018. Evalues were guessed as reasonable adjustments of factors of 10, without pushing the e-value too low. This means profile differences between server and standalone version of our tools are length dependent. This has impacts on the accuracy of some tools, noteably DISOPRED.
