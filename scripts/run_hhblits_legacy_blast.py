@@ -147,13 +147,13 @@ def set_hh_evalue(seq_details):
     if seq_len <= 500:
         return('0.001')
     if seq_len > 500 and seq_len <= 750:
-        return('0.0001')
+        return('0.001')
     if seq_len > 750 and seq_len <= 1000:
-        return('0.00001')
+        return('0.0001')
     if seq_len > 1000 and seq_len <= 1250:
-        return('0.000001')
+        return('0.0001')
     if seq_len > 1250:
-        return('0.00000001')
+        return('0.00001')
 
 
 def eprint(*args, **kwargs):
