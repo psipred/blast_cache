@@ -212,7 +212,7 @@ if r.status_code == 500:
     upload = False
     print("Seq MD5: "+file_contents['md5'])
     alert_r = requests.post('https://hooks.slack.com/services/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', json={"text": ":rage:\n500 response from BLAST CACHE\nSeq MD5: "+file_contents['md5']})
-
+    print("Slack Response:", alert_r.status_code, alert_r.text)
 # if r.status_code == 404 and ("No Record Available" in r.text or
 #                              "No Entries Available" in r.text or
 #                              "No Objects Available" in r.text or
