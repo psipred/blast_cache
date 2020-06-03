@@ -110,7 +110,7 @@ upload = True
 if(r.status_code == 500):
     upload = False
     print("Seq MD5: "+file_contents['md5'])
-    alert_r = requests.post('https://hooks.slack.com/services/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', json={"text": ":rage:\n500 response from BLAST CACHE\nSeq MD5: "+file_contents['md5']})
+    alert_r = requests.post('https://hooks.slack.com/services/T04UFLG/B014KD09M70/WnFmsP3pMiJ6xRrltBAO7Mpo', json={"text": ":rage:\n500 response from BLAST CACHE\nSeq MD5: "+file_contents['md5']})
     print("Slack Response:", alert_r.status_code, alert_r.text)
 
 
