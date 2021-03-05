@@ -20,21 +20,22 @@ files.
      "PASSWORD": "thisisthedevelopmentpassword",
      "SECRET_KEY": "SOMELONG STRING"
    }
-  log in to postgres and create:
+4.log in to postgres and create:
   CREATE ROLE blast_cache_user WITH LOGIN PASSWORD 'thisisthedevelopmentpassword';
   CREATE DATABASE blast_cache;
   GRANT ALL PRIVILEGES ON DATABASE blast_cache TO blast_cache_user;
   ALTER USER blast_cache_user CREATEDB;
-4. Enable hstore extension (CREATE EXTENSION hstore)
-5. Create test template for the test db
+5. still in postgres Enable hstore extension
+    CREATE EXTENSION hstore
+6. Create test template for the test db
     CREATE DATABASE hstemplate;
     \c hstemplate
     CREATE EXTENSION hstore;
     update pg_database set datistemplate=true  where datname='hstemplate';
     \c blast_cache
     CREATE EXTENSION hstore;
-6. Run migrations
-7. Add 'manage.py createsuperuser'
+7. Run migrations
+8. Add 'manage.py createsuperuser'
 
 ## API
 1. GET Requests
