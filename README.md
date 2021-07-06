@@ -1,5 +1,4 @@
 # Blast_Cache
-
 This is a system for storing, serving and tracking BLAST and PSI_BLAST PSSM
 files.
 
@@ -22,13 +21,32 @@ files.
      "PASSWORD": "thisisthedevelopmentpassword",
      "SECRET_KEY": "SOMELONG STRING"
    }
+
+## Install the postgres database and then start postgres
+
+   Export the path to wherever postgres has been installed.
+   For mac using homebrew this will be in /usr/local/Cellar
+   This should look something like:
+
+   ```export PATH="/usr/local/Cellar/postgresql@9.6/9.6.20/bin/:$PATH"```
+
+   ## start postgresql
+
+   ```pg_ctl -D /usr/local/var/postgresql@9.6 -l /usr/local/var/postgresql@9.6/server.log start```
+
+   ## login to the database and create a new database/user
+   ```psql -h localhost -d postgres
+   ```
+
+This will start the database server on your localhost. You can then go ahead and make a database with associated user.
+
 5.log in to postgres and create:
   CREATE ROLE blast_cache_user WITH LOGIN PASSWORD 'thisisthedevelopmentpassword';
   CREATE DATABASE blast_cache;
   GRANT ALL PRIVILEGES ON DATABASE blast_cache TO blast_cache_user;
   ALTER USER blast_cache_user CREATEDB;
 6. still in postgres Enable hstore extension
-    CREATE EXTENSION hstore
+    CREATE EXTENSION hstore;
 7. Create test template for the test db
     CREATE DATABASE hstemplate;
     \c hstemplate
@@ -37,7 +55,13 @@ files.
     \c blast_cache
     CREATE EXTENSION hstore;
 8. Run migrations
-9. Add 'manage.py createsuperuser'
+9. from within blast_cache you can now make the migrations and add a superuser
+
+```
+python manage.py makemigrations --settings=analytics_automated_project.settings.dev
+python manage.py migrate --settings=analytics_automated_project.settings.dev
+python manage.py createsuperuser --settings=analytics_automated_project.settings.dev
+```
 
 ## API
 1. GET Requests
