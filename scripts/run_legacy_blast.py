@@ -106,16 +106,7 @@ request_data = dict(zip(i, i))
 
 r = requests.get(entry_query, params=request_data)
 print("Cache Response:", r.status_code)
-upload = True
-if(r.status_code == 500):
-    upload = False
-    print("Seq MD5: "+file_contents['md5'])
-    slack_hook = "https://hooks.slack.com/services/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"
-    alert_r = requests.post(slack_hook, json={"text": ":rage:\n500 response from BLAST CACHE\nLegacy (MEMSAT) Script\nSeq MD5: "+file_contents['md5']})
-    print("Slack Response:", alert_r.status_code, alert_r.text)
-
-
-if (r.status_code == 404 and "No Record Available" in r.text) or r.status_code == 500:
+if r.status_code == 404 and "No Record Available" in r.text:
     print("Running blast")
     cmd = ''
     if output_type == "chk6":
@@ -149,19 +140,15 @@ if (r.status_code == 404 and "No Record Available" in r.text) or r.status_code =
 
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
-    if upload:
-        request_data["file_data"] = pssm_data
-        entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
-                      "blast_hit_count": hit_count, "runtime": runtime,
-                      "sequence": file_contents['seq'],
-                      "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
-                      }
-        # print(entry_data['data'])
-        r = requests.post(entry_uri, data=entry_data)
-        print("Submission Response:", r.status_code)
-        print("Response: ", r.text)
-    else:
-        print("Not sent due to 500 error in server")
+    request_data["file_data"] = pssm_data
+    entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
+                  "blast_hit_count": hit_count, "runtime": runtime,
+                  "sequence": file_contents['seq'],
+                  "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
+                  }
+    # print(entry_data['data'])
+    r = requests.post(entry_uri, data=entry_data)
+    print("Submission Response:", r.status_code)
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
