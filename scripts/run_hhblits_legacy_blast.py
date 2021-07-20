@@ -147,13 +147,13 @@ def set_hh_evalue(seq_details):
     if seq_len <= 500:
         return('0.001')
     if seq_len > 500 and seq_len <= 750:
-        return('0.001')
+        return('0.0001')
     if seq_len > 750 and seq_len <= 1000:
-        return('0.0001')
-    if seq_len > 1000 and seq_len <= 1250:
-        return('0.0001')
-    if seq_len > 1250:
         return('0.00001')
+    if seq_len > 1000 and seq_len <= 1250:
+        return('0.000001')
+    if seq_len > 1250:
+        return('0.00000001')
 
 
 def eprint(*args, **kwargs):
@@ -210,10 +210,7 @@ if output_type == 'mtx6':
 upload = True
 if r.status_code == 500:
     upload = False
-    print("Seq MD5: "+file_contents['md5'])
-    slack_hook = "https://hooks.slack.com/services/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"
-    alert_r = requests.post(slack_hook, json={"text": ":rage:\n500 response from BLAST CACHE\nHHBlits hybrid script\nSeq MD5: "+file_contents['md5']})
-    print("Slack Response:", alert_r.status_code, alert_r.text)
+
 # if r.status_code == 404 and ("No Record Available" in r.text or
 #                              "No Entries Available" in r.text or
 #                              "No Objects Available" in r.text or
