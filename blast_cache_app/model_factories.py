@@ -40,7 +40,7 @@ def produce_settings_hash(data):
     return(m.hexdigest())
 
 
-class CacheEntryFactory(factory.DjangoModelFactory):
+class CacheEntryFactory(factory.django.DjangoModelFactory):
     name = random_string(length=20)
     md5 = produce_sequence_hash()
     accessed_count = random.randint(0, 100)
