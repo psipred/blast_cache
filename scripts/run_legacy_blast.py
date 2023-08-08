@@ -73,10 +73,11 @@ out_dir = sys.argv[2]  # path to place blast output and PSSM files
 base_uri = sys.argv[3]  # ip or URI for the server blast_cache is running on
 blast_bin = sys.argv[4]  # path to the blast binary dir
 blast_db = sys.argv[5]  # path to blast db location
-output_type = sys.argv[6]  # file endsing for PSSM file
+output_type = sys.argv[6]  # file ending for PSSM file
 blast_settings = " ".join(sys.argv[7:])  # get everything else on the
 #                                          commandline make it a string and
 #                                          use it as the blast settings
+print(blast_settings)
 seq_name = fasta_file.split("/")[-1].split(".")[0]
 single_file = out_dir+"/"+seq_name+".sing"
 fasta_contents = []
@@ -104,9 +105,17 @@ entry_query = entry_uri+file_contents['md5']
 i = iter(blast_settings.split())
 request_data = dict(zip(i, i))
 
-r = requests.get(entry_query, params=request_data)
-print("Cache Response:", r.status_code)
-if r.status_code == 404 and "No Record Available" in r.text:
+run_blast = False
+try:
+    r = requests.get(entry_query, params=request_data)
+    print("Cache Response:", r.status_code)
+    if r.status_code == 404 or "No Record Available" in r.text:
+        run_blast = True
+except Exception as e:
+    print("Can't find cache, running blast anyway")
+    run_blast = True
+
+if run_blast:
     print("Running blast")
     cmd = ''
     if output_type == "chk6":
@@ -137,6 +146,11 @@ if r.status_code == 404 and "No Record Available" in r.text:
         shutil.copy(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
     except Exception as e:
         pass
+    if output_type == "chk6":
+        try:
+            shutil.copy(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".mtx6")
+        except Exception as e:
+            pass
 
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
     pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
@@ -147,11 +161,15 @@ if r.status_code == 404 and "No Record Available" in r.text:
                   "data": str(request_data).replace('"', '\\"').replace('\n', '\\n'),
                   }
     # print(entry_data['data'])
-    r = requests.post(entry_uri, data=entry_data)
-    print("Submission Response:", r.status_code)
+    try:
+        r = requests.post(entry_uri, data=entry_data)
+        print("Submission Response:", r.status_code)
+    except Exception as e:
+        print("Can't find cache to post result")
 else:
     # get blast file from cache
     print("Cache Response:", r.status_code, "retrieved file from cache")
+    eprint("Cache Response:", r.status_code)
     if r.status_code == 200:
         response_data = json.loads(r.text)
         if 'data' in response_data:
@@ -167,6 +185,10 @@ else:
             # psiblast pssm
             f.write(response_data['data']['file_data']+'\n')
             f.close
+            try:
+                shutil.copy(seq_name+".lmtx", seq_name+".mtx")
+            except Exception as e:
+                pass
     else:
         # panic
         eprint("Blast cache request returned nether 404 or 200!!!")
