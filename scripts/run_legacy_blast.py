@@ -143,7 +143,7 @@ if run_blast:
     end_time = time.time()
     runtime = math.ceil(end_time-start_time)
     try:
-        shutil.copy(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".lmtx")
+        shutil.copy(out_dir+"/"+seq_name+".mtx", out_dir+"/"+seq_name+".mtx")
     except Exception as e:
         pass
     if output_type == "chk6":
@@ -153,7 +153,7 @@ if run_blast:
             pass
 
     hit_count = get_num_alignments(out_dir+"/"+seq_name+".xml")
-    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".lmtx")
+    pssm_data = get_pssm_data(out_dir+"/"+seq_name+".mtx")
     request_data["file_data"] = pssm_data
     entry_data = {"name": seq_name, "file_type": 2, "md5": file_contents['md5'],
                   "blast_hit_count": hit_count, "runtime": runtime,
@@ -179,16 +179,18 @@ else:
             response_data['data']['file_data'] = \
             response_data['data']['file_data'].replace('"H\n',
                                                        "'H\n")
-            f = open(seq_name+".lmtx", 'w')
+            f = open(seq_name+".mtx", 'w')
             # before printing we should really
             # sanity check that data is a
             # psiblast pssm
             f.write(response_data['data']['file_data']+'\n')
-            f.close
-            try:
-                shutil.copy(seq_name+".lmtx", seq_name+".mtx")
-            except Exception as e:
-                pass
+            f.flush()
+            f.close()
+
+            # try:
+            #     shutil.copy(seq_name+".lmtx", seq_name+".mtx")
+            # except Exception as e:
+            #     pass
     else:
         # panic
         eprint("Blast cache request returned nether 404 or 200!!!")
