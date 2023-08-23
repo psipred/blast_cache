@@ -215,16 +215,16 @@ if r.status_code == 500:
 #                              "No Entries Available" in r.text or
 #                              "No Objects Available" in r.text or
 #                              "No Valid Record Available" in r.text):
-if r.status_code == 404 or r.status_code == 500:
 
-    hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
-                  fasta_file+" -oa3m " + \
-                  out_dir+"/"+seq_name+output_ending + \
-                  " -e "+hh_e_value+" -n "+iterations+" -cpu 2 " + \
-                  "-diff inf -cov 10 -Z 10000 -B 10000 -maxfilt 10000 " + \
-                  "-maxmem 5 -norealign"
-    reformat_cmd = hhblits_root+"/scripts/reformat.pl -v 1 -r -noss a3m psi " + \
-        out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
+hhblist_cmd = hhblits_root+"/bin/hhblits -d "+hhblits_db+" -i " + \
+              fasta_file+" -oa3m " + \
+              out_dir+"/"+seq_name+output_ending + \
+              " -e "+hh_e_value+" -n "+iterations+" -cpu 2 " + \
+              "-diff inf -cov 10 -Z 10000 -B 10000 -maxfilt 10000 " + \
+              "-maxmem 5 -norealign"
+reformat_cmd = hhblits_root+"/scripts/reformat.pl -v 1 -r -noss a3m psi " + \
+    out_dir+"/"+seq_name+output_ending+" "+out_dir+"/"+seq_name+".psi"
+if r.status_code == 404 or r.status_code == 500:
     formatdb_cmd = blast_bin+"/formatdb -i " + \
         out_dir+"/"+seq_name+".flat " + \
         "-t "+out_dir+"/"+seq_name+".flat"
@@ -316,8 +316,8 @@ if r.status_code == 404 or r.status_code == 500:
         print("Not sent due to 500 error in server")
 else:
     # get blast file from cache
-    print("Cache Response:", r.status_code, "retrieved file from cache")
-    print("Response Text", r.text)
+    # print("Cache Response:", r.status_code, "retrieved file from cache")
+    # print("Response Text", r.text)
     if r.status_code == 200:
         response_data = json.loads(r.text)
         if 'data' in response_data:
@@ -337,6 +337,25 @@ else:
 
             dummy_cmd = "touch "+seq_name+output_ending
             os.system(dummy_cmd)
+        
+        print("Running hhblits")
+        print(hhblist_cmd)
+        p = subprocess.Popen(shlex.split(hhblist_cmd), stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        p.communicate()
+        os.remove(out_dir+"/"+seq_name+".hhr")
+    
+        print("Running reformat")
+        print(reformat_cmd)
+        p = subprocess.Popen(shlex.split(reformat_cmd), stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+        p.communicate()
+    
+        print("Flattening a3m file for formatdb")
+        make_flat_fasta_db(out_dir+"/"+seq_name+output_ending, out_dir+"/"+seq_name)
+        # print("Remove Bad Chars from psi")
+        # remove_bad_blast_chars(out_dir+"/"+seq_name+".psi", out_dir+"/"+seq_name)
+
 
     else:
         # panic
