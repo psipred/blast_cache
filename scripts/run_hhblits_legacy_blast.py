@@ -245,15 +245,16 @@ if r.status_code == 404 or r.status_code == 500:
     start_time = time.time()
     print("Running hhblits")
     print(hhblist_cmd)
+    my_env = os.environ.copy()
     p = subprocess.Popen(shlex.split(hhblist_cmd), stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE, env=my_env)
     p.communicate()
     os.remove(out_dir+"/"+seq_name+".hhr")
 
     print("Running reformat")
     print(reformat_cmd)
     p = subprocess.Popen(shlex.split(reformat_cmd), stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE)
+                         stderr=subprocess.PIPE, env=my_env)
     p.communicate()
 
     print("Flattening a3m file for formatdb")
