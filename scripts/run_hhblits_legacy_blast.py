@@ -249,7 +249,8 @@ if r.status_code == 404 or r.status_code == 500:
     p = subprocess.Popen(shlex.split(hhblist_cmd), stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE, env=my_env)
     p.communicate()
-    os.remove(out_dir+"/"+seq_name+".hhr")
+    if os.path.exists(out_dir+"/"+seq_name+".hhr"):
+        os.remove(out_dir+"/"+seq_name+".hhr")
 
     print("Running reformat")
     print(reformat_cmd)
@@ -344,7 +345,8 @@ else:
         p = subprocess.Popen(shlex.split(hhblist_cmd), stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
         p.communicate()
-        os.remove(out_dir+"/"+seq_name+".hhr")
+        if os.path.exists(out_dir+"/"+seq_name+".hhr"):
+            os.remove(out_dir+"/"+seq_name+".hhr")
     
         print("Running reformat")
         print(reformat_cmd)
